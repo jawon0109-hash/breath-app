@@ -197,31 +197,33 @@
     <div class="app-subtitle" style="font-size:1.15rem; margin-bottom:0; letter-spacing:0.18em; font-style:italic; font-weight:500; color:var(--muted);">breathe. pause. return.</div>
   </div>
   <div class="card">
-    <div class="card-label">명상 시간</div>
+    <div class="card-label" id="label-duration">호흡 시간</div>
+    <div style="font-size:0.88rem; color:var(--text); letter-spacing:0.05em;" id="label-30">30분</div>
+  </div>
+  <div class="card">
+    <div class="card-label" id="label-guide">가이드 방식</div>
     <div class="radio-group">
-      <div class="radio-option"><input type="radio" name="duration" id="d30" value="30" checked><label for="d30">30분</label></div>
-      <div class="radio-option"><input type="radio" name="duration" id="d60" value="60"><label for="d60">1시간</label></div>
+      <div class="radio-option"><input type="radio" name="guide" id="gVoice" value="voice" checked><label for="gVoice" id="label-voice">음성</label></div>
+      <div class="radio-option"><input type="radio" name="guide" id="gText" value="text"><label for="gText" id="label-text">텍스트</label></div>
     </div>
   </div>
   <div class="card">
-    <div class="card-label">가이드 방식</div>
-    <div class="radio-group">
-      <div class="radio-option"><input type="radio" name="guide" id="gVoice" value="voice" checked><label for="gVoice">음성</label></div>
-      <div class="radio-option"><input type="radio" name="guide" id="gText" value="text"><label for="gText">텍스트</label></div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-label">오늘의 마음</div>
+    <div class="card-label" id="label-lang">언어</div>
     <div class="radio-group mood-group">
-      <div class="radio-option mood-option"><input type="radio" name="mood" id="m1" value="calm" checked><label for="m1">편안하게</label></div>
-      <div class="radio-option mood-option"><input type="radio" name="mood" id="m2" value="joyful"><label for="m2">즐겁게</label></div>
-      <div class="radio-option mood-option"><input type="radio" name="mood" id="m3" value="light"><label for="m3">가볍게</label></div>
-      <div class="radio-option mood-option"><input type="radio" name="mood" id="m4" value="focus"><label for="m4">집중해서</label></div>
+      <div class="radio-option mood-option"><input type="radio" name="lang" id="l1" value="ko" checked><label for="l1">한국어</label></div>
+      <div class="radio-option mood-option"><input type="radio" name="lang" id="l2" value="ja"><label for="l2">日本語</label></div>
+      <div class="radio-option mood-option"><input type="radio" name="lang" id="l3" value="zh"><label for="l3">中文</label></div>
+      <div class="radio-option mood-option"><input type="radio" name="lang" id="l4" value="en"><label for="l4">English</label></div>
     </div>
   </div>
-  <button class="btn-start" onclick="startMeditation()">시작</button>
-  <div style="margin-top:20px; font-family:'Cormorant Garamond',serif; font-size:0.72rem; font-weight:500; font-style:italic; color:var(--accent); letter-spacing:0.18em; opacity:0.6; text-align:center;">
-    Created by One Mind Project
+  <button class="btn-start" id="btn-start" onclick="startMeditation()">시작</button>
+  <div style="margin-top:16px; text-align:center;">
+    <div id="label-disclaimer" style="font-family:'Cormorant Garamond',serif; font-size:0.74rem; font-weight:500; font-style:italic; color:var(--accent); letter-spacing:0.1em; opacity:0.55; margin-bottom:6px;">
+      * 의학적 목적 아님. 불편하면 중단 *
+    </div>
+    <div style="font-family:'Cormorant Garamond',serif; font-size:0.72rem; font-weight:500; font-style:italic; color:var(--accent); letter-spacing:0.18em; opacity:0.45;">
+      Created by One Mind
+    </div>
   </div>
 </div>
 
@@ -235,7 +237,7 @@
     <div class="guide-text" id="guideText"></div>
     <div class="btn-row">
       <button class="btn-ghost" id="pauseBtn" onclick="togglePause()">일시 정지</button>
-      <button class="btn-ghost danger" onclick="endMeditation()">명상 종료</button>
+      <button class="btn-ghost danger" id="endBtn" onclick="endMeditation()">명상 종료</button>
     </div>
   </div>
 </div>
@@ -244,20 +246,20 @@
 <div class="screen" id="screen-done">
   <div class="complete-wrap">
     <div class="bell-icon">✴</div>
-    <div class="complete-title">명상이 종료되었습니다</div>
+    <div class="complete-title" id="complete-title">명상이 종료되었습니다</div>
     <div class="divider"></div>
     <div class="quote-block">
       <div class="quote-text" id="quoteText"></div>
       <div class="quote-source" id="quoteSource"></div>
     </div>
     <div class="push-section">
-      <div class="push-label">매일 이 시간에 명상 알림을 받으시겠습니까?</div>
+      <div class="push-label" id="push-label">매일 이 시간에 명상 알림을 받으시겠습니까?</div>
       <div class="push-row">
         <button class="btn-push on" id="pushOn" onclick="setPush(true)">알림 ON</button>
         <button class="btn-push off" id="pushOff" onclick="setPush(false)">OFF</button>
       </div>
     </div>
-    <button class="btn-home" onclick="goHome()">홈으로 돌아가기</button>
+    <button class="btn-home" id="btn-home" onclick="goHome()">홈으로 돌아가기</button>
   </div>
 </div>
 
@@ -287,200 +289,424 @@ window.addEventListener('load', () => {
 });
 
 // ════════════════════════════
-// QUOTES — 카테고리별 30개
+// QUOTES — 언어별 30개
 // ════════════════════════════
-const quotes = {
-  calm: [
+const quotesAll = {
+  ko: [
     { text: "고요함 속에서 우리는 진정한 자신을 발견한다.", source: "마르쿠스 아우렐리우스" },
     { text: "사물 그 자체로 돌아가라.", source: "에드문트 후설" },
     { text: "평화는 외부에서 얻는 것이 아니라, 내면에서 찾는 것이다.", source: "부처" },
-    { text: "고요한 물은 깊이 흐른다.", source: "셰익스피어" },
     { text: "침묵은 신의 언어다. 그 외의 모든 것은 번역이다.", source: "루미" },
-    { text: "내면의 고요함을 찾는 자는 이미 반쯤 도달한 것이다.", source: "노자" },
-    { text: "바람이 없을 때 연못은 하늘을 담는다.", source: "선불교 격언" },
     { text: "생각을 내려놓는 순간, 존재가 시작된다.", source: "장자" },
-    { text: "서두르지 마라. 조용히, 그러나 쉬지 말고.", source: "괴테" },
-    { text: "편안함은 마음의 집이다.", source: "마르쿠스 아우렐리우스" },
     { text: "현재에 머무는 것이 가장 위대한 수행이다.", source: "틱낫한" },
     { text: "강은 서두르지 않아도 결국 바다에 닿는다.", source: "노자" },
-    { text: "자신과 화해한 사람만이 세상과 화해할 수 있다.", source: "칼 융" },
     { text: "마음이 고요하면 모든 것이 제자리를 찾는다.", source: "장자" },
-    { text: "숨 하나가 우리를 현재로 데려온다.", source: "틱낫한" },
-    { text: "진정한 평화는 조건이 없다.", source: "지두 크리슈나무르티" },
     { text: "물처럼 흘러라. 막히면 돌아가고, 낮은 곳을 찾아 흘러라.", source: "노자" },
-    { text: "소란스러운 세상에서 고요함은 혁명이다.", source: "마르쿠스 아우렐리우스" },
-    { text: "내면이 고요할 때 비로소 진리가 들린다.", source: "소크라테스" },
     { text: "지금 이 순간은 언제나 충분하다.", source: "에크하르트 톨레" },
-    { text: "깊은 강은 소리 없이 흐른다.", source: "한국 속담" },
-    { text: "피로는 마음에서 온다. 몸은 그것을 따를 뿐이다.", source: "윌리엄 제임스" },
-    { text: "고요히 앉아 있는 것이 때로는 최선의 행동이다.", source: "파스칼" },
-    { text: "바다는 파도에 흔들려도 깊이는 변하지 않는다.", source: "선불교 격언" },
-    { text: "폭풍의 한가운데에도 고요한 눈이 있다.", source: "에크하르트 톨레" },
-    { text: "쉬는 것도 용기다.", source: "어니스트 헤밍웨이" },
-    { text: "당신의 고요함이 세상을 변화시킨다.", source: "라마나 마하리쉬" },
-    { text: "평온함은 나약함이 아니라 내면의 힘이다.", source: "마르쿠스 아우렐리우스" },
-    { text: "고요 속에 모든 답이 있다.", source: "소크라테스" },
-    { text: "멈추는 것이 때로는 가장 빠른 길이다.", source: "노자" },
-  ],
-  joyful: [
     { text: "기쁨은 삶의 의미이자 목적, 인간 존재의 온전한 목표다.", source: "아리스토텔레스" },
     { text: "행복은 습관이다. 그것을 몸에 지녀라.", source: "엘버트 허버드" },
-    { text: "현재 이 순간을 춤처럼 살아라.", source: "에크하르트 톨레" },
-    { text: "기쁨은 당신이 발견하기를 기다리는 보물이다.", source: "틱낫한" },
-    { text: "웃음은 영혼의 햇빛이다.", source: "윌리엄 새커리" },
-    { text: "행복은 멀리 있지 않다. 지금 여기에 있다.", source: "부처" },
-    { text: "삶을 축제처럼 살아라.", source: "오쇼" },
-    { text: "기쁨을 나누면 두 배가 되고 슬픔을 나누면 반이 된다.", source: "쉴러" },
-    { text: "하루에 한 번 이상 웃지 않은 날은 낭비한 날이다.", source: "찰리 채플린" },
-    { text: "감사하는 마음이 기쁨을 낳는다.", source: "메이스터 에크하르트" },
-    { text: "즐거움은 스스로 만드는 것이다.", source: "에픽테토스" },
-    { text: "오늘이라는 선물을 열어라.", source: "앨리스 워커" },
-    { text: "행복은 목적지가 아니라 여행 방식이다.", source: "마거릿 리 런벡" },
-    { text: "작은 기쁨들이 모여 위대한 삶이 된다.", source: "랄프 왈도 에머슨" },
-    { text: "꽃이 피어있는 동안 춤추어라.", source: "일본 속담" },
-    { text: "삶은 아름답다, 그것을 느끼는 순간에.", source: "알베르 카뮈" },
-    { text: "진정한 기쁨은 나눔에서 온다.", source: "알베르트 슈바이처" },
     { text: "매 순간을 살아있는 기적으로 받아들여라.", source: "틱낫한" },
-    { text: "세상은 기쁨으로 가득 차 있다. 그것을 볼 눈이 있다면.", source: "윌리엄 블레이크" },
-    { text: "행복한 사람은 행복한 날을 기다리지 않는다.", source: "안톤 체호프" },
-    { text: "작은 것에서 기쁨을 찾는 자가 진정으로 풍요롭다.", source: "소크라테스" },
-    { text: "삶이 춤이라면, 음악은 지금 이 순간이다.", source: "앨런 와츠" },
     { text: "기쁨은 선택이다.", source: "데스몬드 투투" },
-    { text: "내 안에 기쁨의 샘이 있다.", source: "루미" },
-    { text: "오늘 하루도 기적이다.", source: "마르쿠스 아우렐리우스" },
-    { text: "삶의 기쁨은 복잡한 곳에 있지 않다.", source: "레오 톨스토이" },
     { text: "당신이 존재한다는 것이 이미 기쁨이다.", source: "틱낫한" },
-    { text: "축제는 마음이 만든다.", source: "세네카" },
-    { text: "미소는 세상에서 가장 짧은 거리를 만든다.", source: "빅터 보르게" },
-    { text: "기쁨 속에 있을 때 우리는 가장 완전하다.", source: "C.S. 루이스" },
-  ],
-  light: [
-    { text: "존재한다는 것은 이미 충분히 가볍다.", source: "밀란 쿤데라" },
     { text: "내려놓음이 곧 자유다.", source: "노자" },
-    { text: "깃털처럼 가볍게, 별처럼 자유롭게.", source: "빅토르 위고" },
-    { text: "모든 것을 쥐려 하지 마라. 손을 펴면 더 많은 것이 온다.", source: "장자" },
-    { text: "짐을 내려놓는 순간, 진짜 여행이 시작된다.", source: "파울로 코엘료" },
-    { text: "가벼움은 용기다.", source: "밀란 쿤데라" },
-    { text: "바람처럼 살아라. 흔적 없이, 그러나 강하게.", source: "노자" },
     { text: "아무것도 붙들지 않을 때 모든 것이 온다.", source: "루미" },
-    { text: "구름은 하늘에 집착하지 않는다.", source: "선불교 격언" },
     { text: "비워야 채워진다.", source: "노자" },
-    { text: "새는 가지를 믿어서가 아니라 자신의 날개를 믿기에 날아오른다.", source: "불교 격언" },
-    { text: "가벼운 마음이 가장 멀리 간다.", source: "랄프 왈도 에머슨" },
     { text: "지나간 것을 붙들수록 현재를 잃는다.", source: "에크하르트 톨레" },
-    { text: "무게 없이 사는 것이 지혜다.", source: "장자" },
-    { text: "흐르는 물은 멈추는 법이 없다.", source: "헤라클레이토스" },
-    { text: "두려움을 내려놓으면 삶이 가벼워진다.", source: "카를로스 카스타네다" },
-    { text: "자유는 아무것도 원하지 않는 것이다.", source: "에픽테토스" },
-    { text: "손에 쥔 것이 적을수록 더 멀리 날 수 있다.", source: "앙투안 드 생텍쥐페리" },
-    { text: "과거의 무게를 오늘에 지지 마라.", source: "부처" },
-    { text: "비워진 그릇만이 무언가를 담을 수 있다.", source: "노자" },
-    { text: "숨을 내쉬는 것처럼 모든 것을 내보내라.", source: "틱낫한" },
-    { text: "집착이 사라지면 두려움도 사라진다.", source: "부처" },
-    { text: "나비는 번데기를 그리워하지 않는다.", source: "앨런 와츠" },
-    { text: "오늘 하루도 가볍게 시작하라.", source: "마르쿠스 아우렐리우스" },
-    { text: "완벽하지 않아도 괜찮다. 그냥 흘러가면 된다.", source: "레오나르도 다빈치" },
-    { text: "바람은 방향을 고집하지 않는다.", source: "장자" },
-    { text: "마음이 가벼울 때 세상이 아름답다.", source: "괴테" },
-    { text: "내일의 걱정을 오늘 짊어지지 마라.", source: "성경" },
-    { text: "가벼운 발걸음이 먼 길을 간다.", source: "한국 속담" },
     { text: "집착은 고통의 뿌리다.", source: "부처" },
-  ],
-  focus: [
     { text: "지금 이 순간에 존재하라. 그것이 가장 위대한 선물이다.", source: "에크하르트 톨레" },
-    { text: "집중하는 자에게 세계는 열린다.", source: "라이너 마리아 릴케" },
-    { text: "하나의 목적에 온전히 집중할 때 기적이 일어난다.", source: "루미" },
     { text: "한 번에 하나씩. 그것이 전부다.", source: "레오나르도 다빈치" },
-    { text: "과거는 기억이고 미래는 상상이다. 현재만이 실재한다.", source: "부처" },
-    { text: "주의를 기울이는 것이 사랑의 가장 희귀한 형태다.", source: "시몬 베유" },
-    { text: "집중은 수천 가지 것에 아니오라고 말하는 기술이다.", source: "스티브 잡스" },
     { text: "지금 이 숨 하나에 온 우주가 있다.", source: "틱낫한" },
-    { text: "현재에 충실한 자만이 미래를 만들 수 있다.", source: "피타고라스" },
-    { text: "지금 당신이 하는 일에 온 마음을 기울여라.", source: "헨리 데이비드 소로" },
-    { text: "한 가지를 깊이 아는 것이 모든 것을 얕게 아는 것보다 낫다.", source: "소크라테스" },
-    { text: "마음을 흩트리지 않는 것, 그것이 수행의 전부다.", source: "선불교 격언" },
-    { text: "지금 여기에 뿌리를 내려라.", source: "틱낫한" },
-    { text: "천재는 집중하는 능력이다.", source: "토마스 에디슨" },
+    { text: "주의를 기울이는 것이 사랑의 가장 희귀한 형태다.", source: "시몬 베유" },
     { text: "현재 순간 외에 아무것도 없다.", source: "에크하르트 톨레" },
-    { text: "집중은 힘이고, 산만은 약함이다.", source: "마르쿠스 아우렐리우스" },
-    { text: "지금 이 순간 너는 살아있다. 그것으로 충분하다.", source: "부처" },
-    { text: "깊이 들여다보면 모든 것이 연결되어 있다.", source: "리처드 파인만" },
-    { text: "주의 깊게 사는 것이 잘 사는 것이다.", source: "소크라테스" },
-    { text: "지금 이 순간을 살아라. 그것이 전부다.", source: "앨런 와츠" },
     { text: "관찰하라. 판단 말고.", source: "지두 크리슈나무르티" },
-    { text: "단 하나의 문에 집중하면 모든 문이 열린다.", source: "루미" },
     { text: "지금 이 호흡이 삶이다.", source: "틱낫한" },
-    { text: "마음이 어디 있느냐가 삶의 질을 결정한다.", source: "마르쿠스 아우렐리우스" },
-    { text: "깊이 있게 사는 것이 넓게 사는 것보다 낫다.", source: "헨리 데이비드 소로" },
-    { text: "지금 여기, 이 순간이 영원이다.", source: "에크하르트 톨레" },
-    { text: "온전한 집중이 온전한 삶을 만든다.", source: "윌리엄 제임스" },
-    { text: "산을 오를 때는 산만 보아라.", source: "선불교 격언" },
-    { text: "지금 이 일 하나에 온 마음을 담아라.", source: "장자" },
-    { text: "현재를 사는 자만이 진정으로 산다.", source: "세네카" },
+    { text: "쉬는 것도 용기다.", source: "어니스트 헤밍웨이" },
+    { text: "멈추는 것이 때로는 가장 빠른 길이다.", source: "노자" },
+    { text: "숨 하나가 우리를 현재로 데려온다.", source: "틱낫한" },
+  ],
+  ja: [
+    { text: "静けさの中で、私たちは真の自分を見つける。", source: "マルクス・アウレリウス" },
+    { text: "事物そのものへ還れ。", source: "エドムント・フッサール" },
+    { text: "平和は外から得るものではなく、内から見つけるものだ。", source: "ブッダ" },
+    { text: "沈黙は神の言語だ。それ以外はすべて翻訳にすぎない。", source: "ルーミー" },
+    { text: "思考を手放す瞬間、存在が始まる。", source: "荘子" },
+    { text: "今にとどまることが、最も偉大な修行だ。", source: "ティク・ナット・ハン" },
+    { text: "川は急がなくても、やがて海に辿り着く。", source: "老子" },
+    { text: "心が静かなら、すべてが本来の場所に収まる。", source: "荘子" },
+    { text: "水のように流れよ。塞がれたら迂回し、低い所を目指せ。", source: "老子" },
+    { text: "この瞬間は、いつでも十分だ。", source: "エックハルト・トール" },
+    { text: "喜びは人生の意味であり目的、人間存在の完全な目標だ。", source: "アリストテレス" },
+    { text: "幸福は習慣だ。それを身につけよ。", source: "エルバート・ハバード" },
+    { text: "すべての瞬間を、生きた奇跡として受け取れ。", source: "ティク・ナット・ハン" },
+    { text: "喜びは選択だ。", source: "デズモンド・ツツ" },
+    { text: "あなたが存在することは、すでに喜びだ。", source: "ティク・ナット・ハン" },
+    { text: "手放すことが、自由だ。", source: "老子" },
+    { text: "何もつかまないとき、すべてがやってくる。", source: "ルーミー" },
+    { text: "空にすることで、満たされる。", source: "老子" },
+    { text: "過去にしがみつくほど、現在を失う。", source: "エックハルト・トール" },
+    { text: "執着は苦しみの根源だ。", source: "ブッダ" },
+    { text: "今この瞬間に存在せよ。それが最大の贈り物だ。", source: "エックハルト・トール" },
+    { text: "一度に一つだけ。それがすべてだ。", source: "レオナルド・ダ・ヴィンチ" },
+    { text: "今この一息に、宇宙全体がある。", source: "ティク・ナット・ハン" },
+    { text: "注意を払うことは、愛の最も稀な形だ。", source: "シモーヌ・ヴェイユ" },
+    { text: "現在の瞬間以外、何もない。", source: "エックハルト・トール" },
+    { text: "観察せよ。判断するな。", source: "クリシュナムルティ" },
+    { text: "今この呼吸が、命だ。", source: "ティク・ナット・ハン" },
+    { text: "休むことも勇気だ。", source: "アーネスト・ヘミングウェイ" },
+    { text: "立ち止まることが、時に最も速い道だ。", source: "老子" },
+    { text: "一つの息が、私たちを今に連れ戻す。", source: "ティク・ナット・ハン" },
+  ],
+  zh: [
+    { text: "在宁静中，我们发现真实的自己。", source: "马可·奥勒留" },
+    { text: "回归事物本身。", source: "埃德蒙德·胡塞尔" },
+    { text: "平静不是从外部获得的，而是从内心寻找的。", source: "佛陀" },
+    { text: "沉默是神的语言，其余的一切都是翻译。", source: "鲁米" },
+    { text: "放下思想的那一刻，存在开始了。", source: "庄子" },
+    { text: "活在当下是最伟大的修行。", source: "一行禅师" },
+    { text: "河流不急，最终也能到达大海。", source: "老子" },
+    { text: "心若宁静，万物各归其位。", source: "庄子" },
+    { text: "像水一样流淌，遇阻则绕，向低处流。", source: "老子" },
+    { text: "此刻，永远足够。", source: "埃克哈特·托利" },
+    { text: "快乐是生命的意义与目的。", source: "亚里士多德" },
+    { text: "幸福是一种习惯，将它带在身边。", source: "埃尔伯特·哈伯德" },
+    { text: "将每一个瞬间视为活生生的奇迹来接受。", source: "一行禅师" },
+    { text: "喜悦是一种选择。", source: "德斯蒙德·图图" },
+    { text: "你的存在本身就是喜悦。", source: "一行禅师" },
+    { text: "放下即自由。", source: "老子" },
+    { text: "当你不执着于任何事物时，一切都会来到。", source: "鲁米" },
+    { text: "空才能被填满。", source: "老子" },
+    { text: "越执着于过去，越失去当下。", source: "埃克哈特·托利" },
+    { text: "执着是痛苦的根源。", source: "佛陀" },
+    { text: "活在当下，那是最伟大的礼物。", source: "埃克哈特·托利" },
+    { text: "一次只做一件事，这就是全部。", source: "列奥纳多·达·芬奇" },
+    { text: "此刻的一次呼吸中，蕴含着整个宇宙。", source: "一行禅师" },
+    { text: "给予关注是爱最稀有的形式。", source: "西蒙娜·薇依" },
+    { text: "除了当下，什么都不存在。", source: "埃克哈特·托利" },
+    { text: "观察，不判断。", source: "克里希那穆提" },
+    { text: "此刻的呼吸就是生命。", source: "一行禅师" },
+    { text: "休息也是一种勇气。", source: "欧内斯特·海明威" },
+    { text: "停下来有时是最快的路。", source: "老子" },
+    { text: "一次呼吸，将我们带回当下。", source: "一行禅师" },
+  ],
+  en: [
+    { text: "In stillness, we discover our true selves.", source: "Marcus Aurelius" },
+    { text: "Return to the things themselves.", source: "Edmund Husserl" },
+    { text: "Peace is not found outside, it is found within.", source: "Buddha" },
+    { text: "Silence is the language of God; all else is poor translation.", source: "Rumi" },
+    { text: "The moment you let go of thought, existence begins.", source: "Zhuangzi" },
+    { text: "Staying in the present moment is the greatest practice.", source: "Thich Nhat Hanh" },
+    { text: "A river reaches the sea without rushing.", source: "Lao Tzu" },
+    { text: "When the mind is still, everything falls into place.", source: "Zhuangzi" },
+    { text: "Flow like water. Go around obstacles, seek the lower path.", source: "Lao Tzu" },
+    { text: "This moment is always enough.", source: "Eckhart Tolle" },
+    { text: "Joy is the meaning and purpose of life, the whole aim of human existence.", source: "Aristotle" },
+    { text: "Happiness is a habit. Cultivate it.", source: "Elbert Hubbard" },
+    { text: "Receive every moment as a living miracle.", source: "Thich Nhat Hanh" },
+    { text: "Joy is a choice.", source: "Desmond Tutu" },
+    { text: "That you exist is already a joy.", source: "Thich Nhat Hanh" },
+    { text: "Letting go is freedom.", source: "Lao Tzu" },
+    { text: "When you hold on to nothing, everything comes.", source: "Rumi" },
+    { text: "Empty yourself to be filled.", source: "Lao Tzu" },
+    { text: "The more you cling to the past, the more you lose the present.", source: "Eckhart Tolle" },
+    { text: "Attachment is the root of suffering.", source: "Buddha" },
+    { text: "Be present in this moment. It is the greatest gift.", source: "Eckhart Tolle" },
+    { text: "One thing at a time. That is all.", source: "Leonardo da Vinci" },
+    { text: "In this single breath, the whole universe resides.", source: "Thich Nhat Hanh" },
+    { text: "Attention is the rarest and purest form of generosity.", source: "Simone Weil" },
+    { text: "There is nothing but the present moment.", source: "Eckhart Tolle" },
+    { text: "Observe. Don't judge.", source: "Jiddu Krishnamurti" },
+    { text: "This breath, right now, is life.", source: "Thich Nhat Hanh" },
+    { text: "Rest is also courage.", source: "Ernest Hemingway" },
+    { text: "Sometimes stopping is the fastest path.", source: "Lao Tzu" },
+    { text: "One breath brings us back to the present.", source: "Thich Nhat Hanh" },
   ],
 };
 
-// 텍스트 모드용 — 화면에 순차적으로 표시되는 세그먼트
-const guideSegments = [
-  { text: "편안하게 누워주세요.",                                          pause: 2500 },
-  { text: "가능하다면\n몸을 대자 형태로 펼쳐 눕습니다.",                  pause: 3000 },
-  { text: "팔은 몸에서 조금 떨어뜨립니다.\n손바닥은 하늘을 향하게 둡니다.", pause: 3000 },
-  { text: "대자 형태가 어렵다면\n팔을 몸 옆에 편안하게 둡니다.",          pause: 2000 },
-  { text: "이때 손바닥은\n바닥을 향하게 둡니다.",                          pause: 3000 },
-  { text: "이제 천천히 눈을 감습니다.",                                    pause: 4000 },
-  { text: "몸의 긴장을\n부드럽게 풀어주세요.",                             pause: 4000 },
-  { text: "지금부터\n호흡을 시작합니다.",                                  pause: 3000 },
-  { text: "이 호흡은\n입으로 들이마시고\n입으로 내쉬는 호흡입니다.",      pause: 4000 },
-  { text: "들이마실 때 배를 내밀고\n내쉴 때 배를 깊게 집어넣습니다.",    pause: 5000 },
-  { text: "이제 시작합니다.",                                              pause: 2000 },
-  { text: "입으로\n천천히 숨을 들이마십니다.",                             pause: 4000 },
-  { text: "배를\n부드럽게 내밉니다.",                                      pause: 2000 },
-  { text: "이제\n입으로 숨을 내쉽니다.",                                   pause: 6000 },
-  { text: "배를\n깊게 집어넣습니다.",                                      pause: 3000 },
-  { text: "다시 이어갑니다.",                                              pause: 2000 },
-  { text: "입으로\n숨을 들이마십니다.",                                    pause: 4000 },
-  { text: "입으로\n숨을 내쉽니다.",                                        pause: 6000 },
-  { text: "들이마실 때\n배가 앞으로 나옵니다.",                            pause: 4000 },
-  { text: "내쉴 때\n배를 깊게 집어넣습니다.",                              pause: 6000 },
-  { text: "호흡의 리듬을\n편안하게 유지합니다.",                           pause: 5000 },
-  { text: "몸의 긴장을\n천천히 내려놓습니다.",                             pause: 5000 },
-  { text: "생각이 떠올라도 괜찮습니다.",                                   pause: 3000 },
-  { text: "다시\n호흡으로 돌아옵니다.",                                    pause: 4000 },
-  { text: "입으로 들이마십니다.",                                          pause: 4000 },
-  { text: "입으로 내쉽니다.",                                              pause: 6000 },
-  { text: "이 호흡을\n조용히 이어갑니다.",                                 pause: 10000 },
-];
+// ════════════════════════════
+// 언어별 UI 텍스트
+// ════════════════════════════
+const i18n = {
+  ko: {
+    duration: '호흡 시간', min30: '30분',
+    guide: '가이드 방식', voice: '음성', text: '텍스트',
+    langLabel: '언어',
+    start: '시작',
+    pause: '일시 정지', resume: '계속하기', pausing: '· 일시정지 중 ·', end: '명상 종료',
+    complete: '명상이 종료되었습니다',
+    pushLabel: '매일 이 시간에 명상 알림을 받으시겠습니까?',
+    pushOn: '알림 ON', pushOff: 'OFF',
+    home: '홈으로 돌아가기',
+    disclaimer: '* 의학적 목적이 아니니 불편하면 중단해주세요. *',
+    ttsLang: 'ko-KR', ttsRate: 0.82,
+  },
+  ja: {
+    duration: '呼吸時間', min30: '30分',
+    guide: 'ガイド方式', voice: '音声', text: 'テキスト',
+    langLabel: '言語',
+    start: '開始',
+    pause: '一時停止', resume: '再開', pausing: '· 一時停止中 ·', end: '終了',
+    complete: '瞑想が終了しました',
+    pushLabel: '毎日この時間に瞑想の通知を受け取りますか？',
+    pushOn: '通知 ON', pushOff: 'OFF',
+    home: 'ホームに戻る',
+    disclaimer: '* 医療目的ではありません。不快な場合は中断してください *',
+    ttsLang: 'ja-JP', ttsRate: 0.88,
+  },
+  zh: {
+    duration: '呼吸时间', min30: '30分钟',
+    guide: '引导方式', voice: '语音', text: '文字',
+    langLabel: '语言',
+    start: '开始',
+    pause: '暂停', resume: '继续', pausing: '· 暂停中 ·', end: '结束冥想',
+    complete: '冥想结束了',
+    pushLabel: '每天在这个时间接收冥想提醒吗？',
+    pushOn: '通知 ON', pushOff: 'OFF',
+    home: '返回首页',
+    disclaimer: '* 非医疗目的。如感不适请停止 *',
+    ttsLang: 'zh-CN', ttsRate: 0.78,
+  },
+  en: {
+    duration: 'Breathing Time', min30: '30 min',
+    guide: 'Guide', voice: 'Voice', text: 'Text',
+    langLabel: 'Language',
+    start: 'Start',
+    pause: 'Pause', resume: 'Resume', pausing: '· Paused ·', end: 'End',
+    complete: 'Meditation Complete',
+    pushLabel: 'Receive a daily meditation reminder at this time?',
+    pushOn: 'Notify ON', pushOff: 'OFF',
+    home: 'Back to Home',
+    disclaimer: '* Not for medical use. Stop if uncomfortable *',
+    ttsLang: 'en-US', ttsRate: 0.82,
+  },
+};
 
-// 음성 모드용 — 각 문장을 순서대로 읽고 지정된 ms만큼 정확하게 쉼
-// pause: 이 문장을 읽은 뒤 다음 문장까지 대기 시간
-const voiceSegments = [
-  { text: "편안하게 누워주세요. 가능하다면 몸을 대자 형태로 펼쳐 눕습니다.", pause: 2000 },
-  { text: "팔은 몸에서 조금 떨어뜨립니다. 손바닥은 하늘을 향하게 둡니다.", pause: 2000 },
-  { text: "대자 형태가 어렵다면 팔을 몸 옆에 편안하게 둡니다. 이때 손바닥은 바닥을 향하게 둡니다.", pause: 2000 },
-  { text: "이제 천천히 눈을 감습니다. 몸의 긴장을 부드럽게 풀어주세요.", pause: 2000 },
-  { text: "지금부터 호흡을 시작합니다. 이 호흡은 입으로 들이마시고 입으로 내쉬는 호흡입니다.", pause: 2000 },
-  { text: "들이마실 때 배를 내밀고, 내쉴 때 배를 깊게 집어넣습니다.", pause: 2000 },
-  { text: "이제 시작합니다.", pause: 2000 },
-  { text: "입으로 천천히 숨을 들이마십니다. 배를 부드럽게 내밉니다.", pause: 2000 },
-  { text: "이제 입으로 숨을 내쉽니다. 배를 깊게 집어넣습니다.", pause: 2000 },
-  { text: "다시 이어갑니다.", pause: 2000 },
-  { text: "입으로 숨을 들이마십니다. 들이마실 때 배가 앞으로 나옵니다.", pause: 2000 },
-  { text: "입으로 숨을 내쉽니다. 내쉴 때 배를 깊게 집어넣습니다.", pause: 2000 },
-  { text: "호흡의 리듬을 편안하게 유지합니다. 몸의 긴장을 천천히 내려놓습니다.", pause: 5000 },
-  { text: "생각이 떠올라도 괜찮습니다. 다시 호흡으로 돌아옵니다.", pause: 5000 },
-  { text: "입으로 들이마십니다.", pause: 2000 },
-  { text: "입으로 내쉽니다.", pause: 5000 },
-  { text: "이 호흡을 조용히 이어갑니다.", pause: 0 },
-];
+// ════════════════════════════
+// 언어별 텍스트 가이드 세그먼트
+// ════════════════════════════
+const guideSegmentsAll = {
+  ko: [
+    { text: "편안하게 누워주세요.",                                          pause: 2500 },
+    { text: "가능하다면\n몸을 대자 형태로 펼쳐 눕습니다.",                  pause: 3000 },
+    { text: "팔은 몸에서 조금 떨어뜨립니다.\n손바닥은 하늘을 향하게 둡니다.", pause: 3000 },
+    { text: "대자 형태가 어렵다면\n팔을 몸 옆에 편안하게 둡니다.",          pause: 2000 },
+    { text: "이때 손바닥은\n바닥을 향하게 둡니다.",                          pause: 3000 },
+    { text: "이제 천천히 눈을 감습니다.",                                    pause: 4000 },
+    { text: "몸의 긴장을\n부드럽게 풀어주세요.",                             pause: 4000 },
+    { text: "지금부터\n호흡을 시작합니다.",                                  pause: 3000 },
+    { text: "이 호흡은\n입으로 들이마시고\n입으로 내쉬는 호흡입니다.",      pause: 4000 },
+    { text: "들이마실 때 배를 내밀고\n내쉴 때 배를 깊게 집어넣습니다.",    pause: 5000 },
+    { text: "이제 시작합니다.",                                              pause: 2000 },
+    { text: "입으로\n천천히 숨을 들이마십니다.",                             pause: 4000 },
+    { text: "배를\n부드럽게 내밉니다.",                                      pause: 2000 },
+    { text: "이제\n입으로 숨을 내쉽니다.",                                   pause: 6000 },
+    { text: "배를\n깊게 집어넣습니다.",                                      pause: 3000 },
+    { text: "다시 이어갑니다.",                                              pause: 2000 },
+    { text: "입으로\n숨을 들이마십니다.",                                    pause: 4000 },
+    { text: "입으로\n숨을 내쉽니다.",                                        pause: 6000 },
+    { text: "호흡의 리듬을\n편안하게 유지합니다.",                           pause: 5000 },
+    { text: "몸의 긴장을\n천천히 내려놓습니다.",                             pause: 5000 },
+    { text: "생각이 떠올라도 괜찮습니다.",                                   pause: 3000 },
+    { text: "다시\n호흡으로 돌아옵니다.",                                    pause: 4000 },
+    { text: "입으로 들이마십니다.",                                          pause: 4000 },
+    { text: "입으로 내쉽니다.",                                              pause: 6000 },
+    { text: "이 호흡을\n조용히 이어갑니다.",                                 pause: 10000 },
+  ],
+  ja: [
+    { text: "楽に横になってください。",                                      pause: 2500 },
+    { text: "できれば\n大の字に体を広げて横になります。",                    pause: 3000 },
+    { text: "腕を体から少し離します。\n手のひらは天井に向けてください。",    pause: 3000 },
+    { text: "大の字が難しければ\n腕を体の横に楽に置きます。",               pause: 2000 },
+    { text: "このとき手のひらは\n床に向けてください。",                      pause: 3000 },
+    { text: "ゆっくりと目を閉じます。",                                      pause: 4000 },
+    { text: "体の力を\n優しく抜いてください。",                              pause: 4000 },
+    { text: "今から\n呼吸を始めます。",                                      pause: 3000 },
+    { text: "口から吸って\n口から吐く呼吸です。",                            pause: 4000 },
+    { text: "吸うときにお腹を出し\n吐くときにお腹を深く引き込みます。",     pause: 5000 },
+    { text: "では始めます。",                                                pause: 2000 },
+    { text: "口から\nゆっくり息を吸います。",                               pause: 4000 },
+    { text: "お腹を\n優しく出します。",                                      pause: 2000 },
+    { text: "口から\n息を吐きます。",                                        pause: 6000 },
+    { text: "お腹を\n深く引き込みます。",                                    pause: 3000 },
+    { text: "続けましょう。",                                                pause: 2000 },
+    { text: "口から\n息を吸います。",                                        pause: 4000 },
+    { text: "口から\n息を吐きます。",                                        pause: 6000 },
+    { text: "呼吸のリズムを\n心地よく保ちます。",                           pause: 5000 },
+    { text: "体の緊張を\nゆっくりと手放します。",                           pause: 5000 },
+    { text: "考えが浮かんでも大丈夫です。",                                  pause: 3000 },
+    { text: "また\n呼吸に戻ります。",                                        pause: 4000 },
+    { text: "口から吸います。",                                              pause: 4000 },
+    { text: "口から吐きます。",                                              pause: 6000 },
+    { text: "この呼吸を\n静かに続けます。",                                  pause: 10000 },
+  ],
+  zh: [
+    { text: "请舒适地躺下。",                                                pause: 2500 },
+    { text: "如果可以\n请将身体展开成大字形躺好。",                          pause: 3000 },
+    { text: "双臂稍微离开身体。\n手掌朝向天花板。",                          pause: 3000 },
+    { text: "如果大字形困难\n请将手臂舒适地放在身体两侧。",                  pause: 2000 },
+    { text: "此时手掌\n朝向地面。",                                          pause: 3000 },
+    { text: "现在慢慢闭上眼睛。",                                            pause: 4000 },
+    { text: "轻轻放松\n身体的紧张。",                                        pause: 4000 },
+    { text: "现在\n开始呼吸。",                                              pause: 3000 },
+    { text: "这是用嘴吸气\n用嘴呼气的呼吸方式。",                           pause: 4000 },
+    { text: "吸气时挺出腹部\n呼气时深深收回腹部。",                          pause: 5000 },
+    { text: "现在开始。",                                                    pause: 2000 },
+    { text: "用嘴\n慢慢吸气。",                                              pause: 4000 },
+    { text: "轻轻\n挺出腹部。",                                              pause: 2000 },
+    { text: "现在\n用嘴呼气。",                                              pause: 6000 },
+    { text: "深深\n收回腹部。",                                              pause: 3000 },
+    { text: "继续。",                                                        pause: 2000 },
+    { text: "用嘴\n吸气。",                                                  pause: 4000 },
+    { text: "用嘴\n呼气。",                                                  pause: 6000 },
+    { text: "保持呼吸的节奏\n舒适地进行。",                                  pause: 5000 },
+    { text: "慢慢放下\n身体的紧张。",                                        pause: 5000 },
+    { text: "有想法浮现也没关系。",                                          pause: 3000 },
+    { text: "再次\n回到呼吸上。",                                            pause: 4000 },
+    { text: "用嘴吸气。",                                                    pause: 4000 },
+    { text: "用嘴呼气。",                                                    pause: 6000 },
+    { text: "静静地\n继续这个呼吸。",                                        pause: 10000 },
+  ],
+  en: [
+    { text: "Please lie down comfortably.",                                  pause: 2500 },
+    { text: "If you can,\nstretch your body out into a star shape.",         pause: 3000 },
+    { text: "Move your arms slightly away from your body.\nPalms facing up toward the ceiling.", pause: 3000 },
+    { text: "If a star shape is difficult,\nplace your arms comfortably at your sides.", pause: 2000 },
+    { text: "In this case,\npalms facing down toward the floor.",            pause: 3000 },
+    { text: "Now slowly close your eyes.",                                   pause: 4000 },
+    { text: "Gently release\nany tension in your body.",                    pause: 4000 },
+    { text: "We will now\nbegin the breathing.",                            pause: 3000 },
+    { text: "Breathe in through your mouth\nand out through your mouth.",   pause: 4000 },
+    { text: "As you inhale, let your belly rise.\nAs you exhale, draw your belly in deeply.", pause: 5000 },
+    { text: "Let's begin.",                                                  pause: 2000 },
+    { text: "Slowly breathe in\nthrough your mouth.",                       pause: 4000 },
+    { text: "Gently\nlet your belly rise.",                                  pause: 2000 },
+    { text: "Now breathe out\nthrough your mouth.",                         pause: 6000 },
+    { text: "Draw your belly\nin deeply.",                                   pause: 3000 },
+    { text: "Continue.",                                                     pause: 2000 },
+    { text: "Breathe in\nthrough your mouth.",                              pause: 4000 },
+    { text: "Breathe out\nthrough your mouth.",                             pause: 6000 },
+    { text: "Keep your breathing rhythm\ncomfortable and steady.",           pause: 5000 },
+    { text: "Slowly release\nthe tension in your body.",                    pause: 5000 },
+    { text: "It is okay if thoughts arise.",                                 pause: 3000 },
+    { text: "Simply return\nto your breath.",                               pause: 4000 },
+    { text: "Breathe in.",                                                   pause: 4000 },
+    { text: "Breathe out.",                                                  pause: 6000 },
+    { text: "Quietly continue\nthis breathing.",                            pause: 10000 },
+  ],
+};
+
+// ════════════════════════════
+// 언어별 음성 가이드 세그먼트
+// ════════════════════════════
+const voiceSegmentsAll = {
+  ko: [
+    { text: "편안하게 누워주세요. 가능하다면 몸을 대자 형태로 펼쳐 눕습니다.", pause: 2000 },
+    { text: "팔은 몸에서 조금 떨어뜨립니다. 손바닥은 하늘을 향하게 둡니다.", pause: 2000 },
+    { text: "대자 형태가 어렵다면 팔을 몸 옆에 편안하게 둡니다. 이때 손바닥은 바닥을 향하게 둡니다.", pause: 2000 },
+    { text: "이제 천천히 눈을 감습니다. 몸의 긴장을 부드럽게 풀어주세요.", pause: 2000 },
+    { text: "지금부터 호흡을 시작합니다. 이 호흡은 입으로 들이마시고 입으로 내쉬는 호흡입니다.", pause: 2000 },
+    { text: "들이마실 때 배를 내밀고, 내쉴 때 배를 깊게 집어넣습니다.", pause: 2000 },
+    { text: "이제 시작합니다.", pause: 2000 },
+    { text: "입으로 천천히 숨을 들이마십니다. 배를 부드럽게 내밉니다.", pause: 2000 },
+    { text: "이제 입으로 숨을 내쉽니다. 배를 깊게 집어넣습니다.", pause: 2000 },
+    { text: "다시 이어갑니다.", pause: 2000 },
+    { text: "입으로 숨을 들이마십니다. 들이마실 때 배가 앞으로 나옵니다.", pause: 2000 },
+    { text: "입으로 숨을 내쉽니다. 내쉴 때 배를 깊게 집어넣습니다.", pause: 2000 },
+    { text: "호흡의 리듬을 편안하게 유지합니다. 몸의 긴장을 천천히 내려놓습니다.", pause: 5000 },
+    { text: "생각이 떠올라도 괜찮습니다. 다시 호흡으로 돌아옵니다.", pause: 5000 },
+    { text: "입으로 들이마십니다.", pause: 2000 },
+    { text: "입으로 내쉽니다.", pause: 5000 },
+    { text: "이 호흡을 조용히 이어갑니다.", pause: 0 },
+  ],
+  ja: [
+    { text: "楽に横になってください。できれば大の字に体を広げて横になります。", pause: 2000 },
+    { text: "腕を体から少し離します。手のひらは天井に向けてください。", pause: 2000 },
+    { text: "大の字が難しければ腕を体の横に楽に置きます。このとき手のひらは床に向けてください。", pause: 2000 },
+    { text: "ゆっくりと目を閉じます。体の力を優しく抜いてください。", pause: 2000 },
+    { text: "今から呼吸を始めます。口から吸って口から吐く呼吸です。", pause: 2000 },
+    { text: "吸うときにお腹を出し、吐くときにお腹を深く引き込みます。", pause: 2000 },
+    { text: "では始めます。", pause: 2000 },
+    { text: "口からゆっくり息を吸います。お腹を優しく出します。", pause: 2000 },
+    { text: "口から息を吐きます。お腹を深く引き込みます。", pause: 2000 },
+    { text: "続けましょう。", pause: 2000 },
+    { text: "口から息を吸います。吸うときお腹が前に出ます。", pause: 2000 },
+    { text: "口から息を吐きます。吐くときお腹を深く引き込みます。", pause: 2000 },
+    { text: "呼吸のリズムを心地よく保ちます。体の緊張をゆっくりと手放します。", pause: 5000 },
+    { text: "考えが浮かんでも大丈夫です。また呼吸に戻ります。", pause: 5000 },
+    { text: "口から吸います。", pause: 2000 },
+    { text: "口から吐きます。", pause: 5000 },
+    { text: "この呼吸を静かに続けます。", pause: 0 },
+  ],
+  zh: [
+    { text: "请舒适地躺下。如果可以，请将身体展开成大字形躺好。", pause: 2000 },
+    { text: "双臂稍微离开身体。手掌朝向天花板。", pause: 2000 },
+    { text: "如果大字形困难，请将手臂舒适地放在身体两侧。此时手掌朝向地面。", pause: 2000 },
+    { text: "现在慢慢闭上眼睛。轻轻放松身体的紧张。", pause: 2000 },
+    { text: "现在开始呼吸。这是用嘴吸气用嘴呼气的呼吸方式。", pause: 2000 },
+    { text: "吸气时挺出腹部，呼气时深深收回腹部。", pause: 2000 },
+    { text: "现在开始。", pause: 2000 },
+    { text: "用嘴慢慢吸气。轻轻挺出腹部。", pause: 2000 },
+    { text: "现在用嘴呼气。深深收回腹部。", pause: 2000 },
+    { text: "继续。", pause: 2000 },
+    { text: "用嘴吸气。吸气时腹部向前挺出。", pause: 2000 },
+    { text: "用嘴呼气。呼气时深深收回腹部。", pause: 2000 },
+    { text: "保持呼吸的节奏舒适地进行。慢慢放下身体的紧张。", pause: 5000 },
+    { text: "有想法浮现也没关系。再次回到呼吸上。", pause: 5000 },
+    { text: "用嘴吸气。", pause: 2000 },
+    { text: "用嘴呼气。", pause: 5000 },
+    { text: "静静地继续这个呼吸。", pause: 0 },
+  ],
+  en: [
+    { text: "Please lie down comfortably. If you can, stretch your body out into a star shape.", pause: 2000 },
+    { text: "Move your arms slightly away from your body. Palms facing up toward the ceiling.", pause: 2000 },
+    { text: "If a star shape is difficult, place your arms at your sides. Palms facing down.", pause: 2000 },
+    { text: "Now slowly close your eyes. Gently release any tension in your body.", pause: 2000 },
+    { text: "We will now begin the breathing. Breathe in through your mouth and out through your mouth.", pause: 2000 },
+    { text: "As you inhale, let your belly rise. As you exhale, draw your belly in deeply.", pause: 2000 },
+    { text: "Let's begin.", pause: 2000 },
+    { text: "Slowly breathe in through your mouth. Gently let your belly rise.", pause: 2000 },
+    { text: "Now breathe out through your mouth. Draw your belly in deeply.", pause: 2000 },
+    { text: "Continue.", pause: 2000 },
+    { text: "Breathe in through your mouth. As you inhale, your belly rises.", pause: 2000 },
+    { text: "Breathe out through your mouth. As you exhale, draw your belly in.", pause: 2000 },
+    { text: "Keep your breathing rhythm comfortable and steady. Slowly release the tension in your body.", pause: 5000 },
+    { text: "It is okay if thoughts arise. Simply return to your breath.", pause: 5000 },
+    { text: "Breathe in.", pause: 2000 },
+    { text: "Breathe out.", pause: 5000 },
+    { text: "Quietly continue this breathing.", pause: 0 },
+  ],
+};
+
+let guideSegments  = guideSegmentsAll.ko;
+let voiceSegments  = voiceSegmentsAll.ko;
 
 // ════════════════════════════
 // STATE
 // ════════════════════════════
 let remaining, interval, guideInterval, expectedEndTime;
-let isPaused = false, guideMode = 'voice', selectedMood = 'calm', guideIndex = 0;
-let audioCtx = null;
-let wakeLock = null;
+let isPaused = false, guideMode = 'voice', selectedLang = 'ko', guideIndex = 0;
+let audioCtx = null, wakeLock = null;
 const synth = window.speechSynthesis;
+
+// 언어 변경 시 UI 라벨 일괄 업데이트
+function applyLang(lang) {
+  selectedLang = lang;
+  const t = i18n[lang];
+  document.getElementById('label-duration').textContent  = t.duration;
+  document.getElementById('label-30').textContent        = t.min30;
+  document.getElementById('label-guide').textContent     = t.guide;
+  document.getElementById('label-voice').textContent     = t.voice;
+  document.getElementById('label-text').textContent      = t.text;
+  document.getElementById('label-lang').textContent      = t.langLabel;
+  document.getElementById('btn-start').textContent       = t.start;
+  document.getElementById('label-disclaimer').textContent = t.disclaimer;
+  guideSegments = guideSegmentsAll[lang];
+  voiceSegments = voiceSegmentsAll[lang];
+}
+
+// 언어 라디오 변경 이벤트
+document.querySelectorAll('input[name="lang"]').forEach(el => {
+  el.addEventListener('change', e => applyLang(e.target.value));
+});
 
 // ════════════════════════════
 // 알림 예약 — setTimeout 단일 체인 방식
@@ -575,16 +801,20 @@ function goHome() { stopAll(); showScreen('screen-home'); }
 function startMeditation() {
   unlockAudio();
   requestWakeLock();
-  const dur = parseInt(document.querySelector('input[name="duration"]:checked').value);
-  guideMode    = document.querySelector('input[name="guide"]:checked').value;
-  selectedMood = document.querySelector('input[name="mood"]:checked').value;
+  const dur = 30; // 30분 고정
+  guideMode   = document.querySelector('input[name="guide"]:checked').value;
+  selectedLang = document.querySelector('input[name="lang"]:checked').value;
+  guideSegments = guideSegmentsAll[selectedLang];
+  voiceSegments = voiceSegmentsAll[selectedLang];
   remaining = dur * 60; isPaused = false; guideIndex = 0;
   expectedEndTime = Date.now() + remaining * 1000;
   updateTimer();
   showScreen('screen-med');
+  const t = i18n[selectedLang];
   document.getElementById('breathRing').classList.add('breathing');
   document.getElementById('pausedLabel').textContent = '';
-  document.getElementById('pauseBtn').textContent = '일시 정지';
+  document.getElementById('pauseBtn').textContent    = t.pause;
+  document.getElementById('endBtn').textContent      = t.end;
   interval = setInterval(tick, 1000);
   scheduleGuide();
 }
@@ -617,14 +847,16 @@ function playVoiceScript(index = 0) {
   if (isPaused || index >= voiceSegments.length) return;
   if (!synth) return;
 
-  guideIndex = index; // 현재 위치 기록 (일시정지 재개용)
-  const seg = voiceSegments[index];
+  guideIndex = index;
+  const seg  = voiceSegments[index];
+  const lang = i18n[selectedLang].ttsLang;
+  const rate = i18n[selectedLang].ttsRate; // 언어별 최적 속도
   synth.cancel();
 
-  const utt = new SpeechSynthesisUtterance(seg.text);
-  utt.lang  = 'ko-KR';
-  utt.rate  = 0.82;
-  utt.pitch = 0.93;
+  const utt  = new SpeechSynthesisUtterance(seg.text);
+  utt.lang   = lang;
+  utt.rate   = rate;
+  utt.pitch  = 0.93;
 
   utt.onend = () => {
     if (!isPaused) {
@@ -651,20 +883,21 @@ function runSegment(index) {
 
 function togglePause() {
   isPaused = !isPaused;
+  const t    = i18n[selectedLang];
   const ring = document.getElementById('breathRing');
   if (isPaused) {
-    document.getElementById('pauseBtn').textContent = '계속하기';
-    document.getElementById('pausedLabel').textContent = '· 일시정지 중 ·';
+    document.getElementById('pauseBtn').textContent    = t.resume;
+    document.getElementById('pausedLabel').textContent = t.pausing;
     ring.classList.remove('breathing');
     if (synth) synth.cancel();
     if (guideInterval) { clearTimeout(guideInterval); guideInterval = null; }
   } else {
     expectedEndTime = Date.now() + remaining * 1000;
-    document.getElementById('pauseBtn').textContent = '일시 정지';
+    document.getElementById('pauseBtn').textContent    = t.pause;
     document.getElementById('pausedLabel').textContent = '';
     ring.classList.add('breathing');
     if (guideMode === 'voice') {
-      playVoiceScript(guideIndex); // 멈춘 문장부터 이어서
+      playVoiceScript(guideIndex);
     } else {
       runSegment(guideIndex);
     }
@@ -693,10 +926,18 @@ function endMeditation() {
       osc.start(now); osc.stop(now + decay);
     });
   } catch(e) {}
-  const pool = quotes[selectedMood] || quotes.calm;
+  // 명언 — 선택 언어의 30개 중 랜덤
+  const pool = quotesAll[selectedLang] || quotesAll.ko;
   const q = pool[Math.floor(Math.random() * pool.length)];
-  document.getElementById('quoteText').textContent  = `"${q.text}"`;
+  document.getElementById('quoteText').textContent   = `"${q.text}"`;
   document.getElementById('quoteSource').textContent = `— ${q.source}`;
+  // 종료 화면 언어 대응
+  const t = i18n[selectedLang];
+  document.getElementById('complete-title').textContent = t.complete;
+  document.getElementById('push-label').textContent     = t.pushLabel;
+  document.getElementById('pushOn').textContent         = t.pushOn;
+  document.getElementById('pushOff').textContent        = t.pushOff;
+  document.getElementById('btn-home').textContent       = t.home;
   document.getElementById('pushOn').className  = 'btn-push on';
   document.getElementById('pushOff').className = 'btn-push off';
   showScreen('screen-done');
