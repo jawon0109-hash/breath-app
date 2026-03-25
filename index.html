@@ -5,160 +5,522 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>breathe. pause. return.</title>
 
-<!-- PWA -->
 <link rel="manifest" href="manifest.json">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="숨">
 <meta name="theme-color" content="#0a0c0f">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600&family=DM+Serif+Display:ital@0;1&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap" rel="stylesheet">
+
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
   :root {
-    --bg: #0a0c0f; --surface: #161a20; --border: rgba(255,255,255,0.07);
-    --text: #d4cfc8; --muted: #6b6660; --accent: #c8a97e; --white: #ede8e0;
+    --bg: #0a0c0f;
+    --surface: #161a20;
+    --border: rgba(255,255,255,0.07);
+    --text: #d4cfc8;
+    --muted: #6b6660;
+    --accent: #c8a97e;
+    --white: #ede8e0;
   }
+
   html, body {
-    height: 100%; background: var(--bg); color: var(--text);
-    font-family: 'Noto Serif KR', serif; font-weight: 300; overflow: hidden;
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Serif KR', serif;
+    font-weight: 300;
+    overflow: hidden;
   }
+
   body::before {
-    content: ''; position: fixed; inset: 0; z-index: 0;
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none; opacity: 0.5;
+    pointer-events: none;
+    opacity: 0.5;
   }
-  .glow-orb { position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; }
-  .glow-orb.amber { width: 400px; height: 400px; background: rgba(200,169,126,0.07); top: -100px; right: -100px; }
-  .glow-orb.blue  { width: 350px; height: 350px; background: rgba(126,184,200,0.05); bottom: -80px; left: -80px; }
+
+  .glow-orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .glow-orb.amber {
+    width: 400px;
+    height: 400px;
+    background: rgba(200,169,126,0.07);
+    top: -100px;
+    right: -100px;
+  }
+  .glow-orb.blue  {
+    width: 350px;
+    height: 350px;
+    background: rgba(126,184,200,0.05);
+    bottom: -80px;
+    left: -80px;
+  }
 
   .screen {
-    position: fixed; inset: 0; z-index: 1;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 40px 28px; opacity: 0; pointer-events: none; transition: opacity 0.9s ease;
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 28px;
+    padding-top: calc(40px + env(safe-area-inset-top));
+    padding-bottom: calc(40px + env(safe-area-inset-bottom));
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.9s ease;
   }
   .screen.active { opacity: 1; pointer-events: all; }
 
   /* ── SPLASH ── */
-  #screen-splash { background: #0a0c0f; z-index: 10; transition: opacity 1.2s ease; }
-  .splash-words { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  #screen-splash {
+    background: #0a0c0f;
+    z-index: 10;
+    transition: opacity 1.2s ease;
+  }
+
+  .splash-words {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
   .splash-word {
-    font-family: 'Cormorant Garamond', serif; font-size: clamp(2.4rem, 11vw, 4.2rem);
-    font-weight: 300; font-style: italic; color: #c8a97e; letter-spacing: 0.1em;
-    opacity: 0; transform: translateY(12px); transition: opacity 0.75s ease, transform 0.75s ease;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.4rem, 11vw, 4.2rem);
+    font-weight: 300;
+    font-style: italic;
+    color: #c8a97e;
+    letter-spacing: 0.1em;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.75s ease, transform 0.75s ease;
     line-height: 1.35;
   }
   .splash-word.visible { opacity: 1; transform: translateY(0); }
 
   /* ── HOME ── */
-  .app-subtitle { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 0.95rem; color: var(--muted); letter-spacing: 0.14em; }
-  .card { width: 100%; max-width: 420px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 24px 22px; margin-bottom: 12px; }
-  .card-label { font-size: 0.65rem; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; margin-bottom: 14px; }
-  .radio-group { display: flex; gap: 10px; flex-wrap: wrap; }
-  .radio-option { flex: 1; min-width: 100px; position: relative; }
+  .app-subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--muted);
+    letter-spacing: 0.14em;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px 22px;
+    margin-bottom: 12px;
+  }
+
+  .card-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .radio-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .radio-option {
+    flex: 1;
+    min-width: 100px;
+    position: relative;
+  }
+
   .radio-option input { display: none; }
+
   .radio-option label {
-    display: block; text-align: center; padding: 10px 12px; border: 1px solid var(--border);
-    border-radius: 10px; font-size: 0.86rem; color: var(--muted); cursor: pointer;
-    transition: all 0.25s; letter-spacing: 0.03em; user-select: none;
+    display: block;
+    text-align: center;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 0.86rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.25s;
+    letter-spacing: 0.03em;
+    user-select: none;
   }
-  .radio-option input:checked + label { border-color: var(--accent); color: var(--accent); background: rgba(200,169,126,0.08); }
+
+  .radio-option input:checked + label {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(200,169,126,0.08);
+  }
+
   .mood-group { gap: 8px; }
-  .mood-option { min-width: calc(50% - 4px); flex: 1 1 calc(50% - 4px); }
-  .btn-start {
-    width: 100%; max-width: 420px; margin-top: 8px; padding: 18px;
-    background: var(--accent); color: #1a1510; border: none; border-radius: 14px;
-    font-family: 'Noto Serif KR', serif; font-size: 1rem; font-weight: 400;
-    letter-spacing: 0.1em; cursor: pointer; transition: all 0.3s;
+  .mood-option {
+    min-width: calc(50% - 4px);
+    flex: 1 1 calc(50% - 4px);
   }
-  .btn-start:hover { background: #d4b88a; transform: translateY(-1px); box-shadow: 0 8px 30px rgba(200,169,126,0.25); }
+
+  .btn-start {
+    width: 100%;
+    max-width: 420px;
+    margin-top: 8px;
+    padding: 18px;
+    background: var(--accent);
+    color: #1a1510;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .btn-start:hover {
+    background: #d4b88a;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 30px rgba(200,169,126,0.25);
+  }
 
   /* ── MEDITATION ── */
-  .med-wrap { text-align: center; width: 100%; max-width: 420px; }
-  .breath-ring {
-    width: 220px; height: 220px; border-radius: 50%; border: 1px solid rgba(200,169,126,0.2);
-    display: flex; align-items: center; justify-content: center; margin: 0 auto 40px; position: relative;
+  .med-wrap {
+    text-align: center;
+    width: 100%;
+    max-width: 420px;
   }
-  .breath-ring::before, .breath-ring::after { content: ''; position: absolute; border-radius: 50%; }
-  .breath-ring::before { inset: 18px; border: 1px solid rgba(200,169,126,0.12); }
-  .breath-ring::after  { inset: 36px; background: radial-gradient(circle, rgba(200,169,126,0.12), transparent 70%); }
+
+  .breath-ring {
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    border: 1px solid rgba(200,169,126,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 40px;
+    position: relative;
+  }
+
+  .breath-ring::before,
+  .breath-ring::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+  }
+
+  .breath-ring::before {
+    inset: 18px;
+    border: 1px solid rgba(200,169,126,0.12);
+  }
+
+  .breath-ring::after {
+    inset: 36px;
+    background: radial-gradient(circle, rgba(200,169,126,0.12), transparent 70%);
+  }
+
   .breath-ring.breathing { animation: breathe 8s ease-in-out infinite; }
+
   @keyframes breathe {
     0%,100% { transform: scale(1); box-shadow: none; }
     50% { transform: scale(1.12); box-shadow: 0 0 60px 20px rgba(200,169,126,0.06); }
   }
-  .timer-display { font-family: 'Cormorant Garamond', serif; font-size: clamp(3.2rem, 13vw, 5rem); font-weight: 300; color: var(--white); letter-spacing: 0.05em; line-height: 1; }
-  .paused-label { font-size: 0.68rem; letter-spacing: 0.22em; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; min-height: 18px; }
+
+  .timer-display {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(3.2rem, 13vw, 5rem);
+    font-weight: 300;
+    color: var(--white);
+    letter-spacing: 0.05em;
+    line-height: 1;
+  }
+
+  .paused-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    min-height: 18px;
+  }
+
   .guide-text {
-    min-height: 90px; font-size: 1rem; color: var(--accent); letter-spacing: 0.05em;
-    line-height: 1.9; font-style: italic; margin-bottom: 44px; opacity: 0;
-    transition: opacity 1.2s ease; white-space: pre-line; text-align: center;
+    min-height: 90px;
+    font-size: 1rem;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    line-height: 1.9;
+    font-style: italic;
+    margin-bottom: 44px;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    white-space: pre-line;
+    text-align: center;
   }
+
   .guide-text.show { opacity: 1; }
-  .btn-row { display: flex; gap: 12px; justify-content: center; }
-  .btn-ghost {
-    padding: 12px 26px; border: 1px solid var(--border); border-radius: 10px; background: transparent;
-    color: var(--muted); font-family: 'Noto Serif KR', serif; font-size: 0.84rem; letter-spacing: 0.08em; cursor: pointer; transition: all 0.25s;
+
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
   }
-  .btn-ghost:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
-  .btn-ghost.danger:hover { border-color: rgba(200,100,80,0.4); color: #e88; }
+
+  .btn-ghost {
+    padding: 12px 26px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.84rem;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+
+  .btn-ghost:hover {
+    border-color: rgba(255,255,255,0.2);
+    color: var(--text);
+  }
+
+  .btn-ghost.danger:hover {
+    border-color: rgba(200,100,80,0.4);
+    color: #e88;
+  }
 
   /* ── COMPLETION ── */
-  .complete-wrap { text-align: center; width: 100%; max-width: 420px; }
-  .bell-icon { font-size: 2.2rem; margin-bottom: 16px; color: var(--accent); animation: fadeUp 1s ease both; }
-  .complete-title { font-family: 'DM Serif Display', serif; font-size: 1.55rem; color: var(--white); margin-bottom: 32px; animation: fadeUp 1s 0.2s ease both; }
-  .divider { width: 100%; height: 1px; background: var(--border); margin: 0 0 26px; }
+  .complete-wrap {
+    text-align: center;
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .bell-icon {
+    font-size: 2.2rem;
+    margin-bottom: 16px;
+    color: var(--accent);
+    animation: fadeUp 1s ease both;
+  }
+
+  .complete-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.55rem;
+    color: var(--white);
+    margin-bottom: 32px;
+    animation: fadeUp 1s 0.2s ease both;
+  }
+
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: var(--border);
+    margin: 0 0 26px;
+  }
+
   .quote-block {
-    background: var(--surface); border: 1px solid var(--border); border-left: 2px solid var(--accent);
-    border-radius: 0 14px 14px 0; padding: 22px 24px; margin-bottom: 30px; text-align: left;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--accent);
+    border-radius: 0 14px 14px 0;
+    padding: 22px 24px;
+    margin-bottom: 30px;
+    text-align: left;
     animation: fadeUp 1s 0.4s ease both;
   }
-  .quote-text { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-style: italic; color: var(--white); line-height: 1.7; margin-bottom: 10px; }
-  .quote-source { font-size: 0.7rem; letter-spacing: 0.16em; color: var(--muted); text-transform: uppercase; }
-  .push-section { margin-bottom: 24px; animation: fadeUp 1s 0.6s ease both; }
-  .push-label { font-size: 0.86rem; color: var(--muted); line-height: 1.7; margin-bottom: 14px; }
-  .push-row { display: flex; gap: 10px; justify-content: center; }
-  .btn-push {
-    padding: 11px 30px; border-radius: 10px; border: 1px solid var(--border); background: transparent;
-    font-family: 'Noto Serif KR', serif; font-size: 0.84rem; letter-spacing: 0.08em; cursor: pointer; color: var(--muted); transition: all 0.25s;
-  }
-  .btn-push.on:hover { background: rgba(200,169,126,0.12); border-color: var(--accent); color: var(--accent); }
-  .btn-push.off:hover { background: rgba(255,255,255,0.04); color: var(--text); }
-  .btn-push.selected-on { background: rgba(200,169,126,0.15); border-color: var(--accent); color: var(--accent); }
-  .btn-push.selected-off { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.15); color: var(--text); }
-  .btn-home {
-    width: 100%; padding: 15px; border: 1px solid var(--border); border-radius: 12px;
-    background: transparent; color: var(--text); font-family: 'Noto Serif KR', serif; font-size: 0.88rem;
-    letter-spacing: 0.1em; cursor: pointer; transition: all 0.3s; animation: fadeUp 1s 0.8s ease both;
-  }
-  .btn-home:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.04); }
 
-  /* ── CUSTOM ALERT (알림 대신 인앱 토스트) ── */
+  .quote-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    font-style: italic;
+    color: var(--white);
+    line-height: 1.7;
+    margin-bottom: 10px;
+  }
+
+  .quote-source {
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    color: var(--muted);
+  }
+
+  .push-section {
+    margin-bottom: 24px;
+    animation: fadeUp 1s 0.6s ease both;
+  }
+
+  .push-label {
+    font-size: 0.86rem;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+
+  .push-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .btn-push {
+    padding: 11px 30px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: transparent;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.84rem;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.25s;
+  }
+
+  .btn-push.on:hover {
+    background: rgba(200,169,126,0.12);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .btn-push.off:hover {
+    background: rgba(255,255,255,0.04);
+    color: var(--text);
+  }
+
+  .btn-push.selected-on {
+    background: rgba(200,169,126,0.15);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .btn-push.selected-off {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.15);
+    color: var(--text);
+  }
+
+  .btn-home {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text);
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.88rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.3s;
+    animation: fadeUp 1s 0.8s ease both;
+  }
+
+  .btn-home:hover {
+    border-color: rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.04);
+  }
+
+  /* ── CUSTOM ALERT ── */
   .notify-toast {
-    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.92);
-    z-index: 100; width: min(360px, 90vw);
-    background: var(--surface); border: 1px solid var(--border);
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.92);
+    z-index: 100;
+    width: min(360px, 90vw);
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-top: 2px solid var(--accent);
-    border-radius: 18px; padding: 32px 28px 24px;
-    text-align: center; opacity: 0; pointer-events: none;
+    border-radius: 18px;
+    padding: 32px 28px 24px;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
     transition: opacity 0.4s ease, transform 0.4s ease;
     box-shadow: 0 24px 60px rgba(0,0,0,0.6);
   }
-  .notify-toast.show { opacity: 1; pointer-events: all; transform: translate(-50%, -50%) scale(1); }
-  .notify-toast-symbol { font-size: 1.8rem; color: var(--accent); margin-bottom: 14px; }
-  .notify-toast-title { font-family: 'DM Serif Display', serif; font-size: 1.1rem; color: var(--white); margin-bottom: 10px; }
-  .notify-toast-body { font-size: 0.82rem; color: var(--muted); line-height: 1.75; margin-bottom: 22px; }
-  .notify-toast-time { font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: var(--accent); margin-bottom: 22px; letter-spacing: 0.08em; }
+
+  .notify-toast.show {
+    opacity: 1;
+    pointer-events: all;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .notify-toast-symbol {
+    font-size: 1.8rem;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+
+  .notify-toast-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    color: var(--white);
+    margin-bottom: 10px;
+  }
+
+  .notify-toast-body {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.75;
+    margin-bottom: 22px;
+  }
+
+  .notify-toast-time {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    color: var(--accent);
+    margin-bottom: 22px;
+    letter-spacing: 0.08em;
+  }
+
   .notify-toast-btn {
-    width: 100%; padding: 13px; background: var(--accent); color: #1a1510;
-    border: none; border-radius: 10px; font-family: 'Noto Serif KR', serif;
-    font-size: 0.88rem; letter-spacing: 0.08em; cursor: pointer;
+    width: 100%;
+    padding: 13px;
+    background: var(--accent);
+    color: #1a1510;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.88rem;
+    letter-spacing: 0.08em;
+    cursor: pointer;
   }
+
   .notify-overlay {
-    position: fixed; inset: 0; z-index: 99; background: rgba(0,0,0,0.55);
-    opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+    position: fixed;
+    inset: 0;
+    z-index: 99;
+    background: rgba(0,0,0,0.55);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
   }
-  .notify-overlay.show { opacity: 1; pointer-events: all; }
+
+  .notify-overlay.show {
+    opacity: 1;
+    pointer-events: all;
+  }
 
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(14px); }
@@ -171,17 +533,19 @@
 <div class="glow-orb amber"></div>
 <div class="glow-orb blue"></div>
 
-<!-- 알림 오버레이 & 토스트 -->
 <div class="notify-overlay" id="notifyOverlay"></div>
 <div class="notify-toast" id="notifyToast">
-  <div class="notify-toast-symbol">✴</div>
-  <div class="notify-toast-title">오늘의 명상 시간입니다</div>
+  <div class="notify-toast-symbol">
+    <svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 1L14.5 8.5L22 11L14.5 13.5L12 21L9.5 13.5L2 11L9.5 8.5L12 1Z"/>
+    </svg>
+  </div>
+  <div class="notify-toast-title" id="notifyToastTitle">오늘의 명상 시간입니다</div>
   <div class="notify-toast-time" id="notifyTime"></div>
-  <div class="notify-toast-body">잠시 멈추고 숨을 고르세요.<br>오늘도 당신만의 고요한 시간입니다.</div>
-  <button class="notify-toast-btn" onclick="closeNotifyToast()">지금 시작하기</button>
+  <div class="notify-toast-body" id="notifyToastBody">잠시 멈추고 숨을 고르세요.<br>오늘도 당신만의 고요한 시간입니다.</div>
+  <button class="notify-toast-btn" id="notifyToastBtn" onclick="closeNotifyToast()">확인</button>
 </div>
 
-<!-- ── SPLASH ── -->
 <div class="screen active" id="screen-splash">
   <div class="splash-words">
     <span class="splash-word" id="sw-breathe">breathe.</span>
@@ -190,36 +554,63 @@
   </div>
 </div>
 
-<!-- ── HOME ── -->
 <div class="screen" id="screen-home">
   <div style="margin-bottom:40px; text-align:center; padding-top:18px;">
     <div style="font-family:'DM Serif Display',serif; font-size:clamp(2.8rem,11vw,4.6rem); color:var(--accent); letter-spacing:0.18em; line-height:1; margin-bottom:10px;">숨</div>
     <div class="app-subtitle" style="font-size:1.15rem; margin-bottom:0; letter-spacing:0.18em; font-style:italic; font-weight:500; color:var(--muted);">breathe. pause. return.</div>
   </div>
+
   <div class="card">
     <div class="card-label" id="label-duration">호흡 시간</div>
-    <div style="font-size:0.88rem; color:var(--text); letter-spacing:0.05em;" id="label-30">30분</div>
+    <div class="radio-group">
+      <div class="radio-option">
+        <input type="radio" name="duration" id="d30" value="30" checked>
+        <label for="d30" id="label-30">30분</label>
+      </div>
+    </div>
   </div>
+
   <div class="card">
     <div class="card-label" id="label-guide">가이드 방식</div>
     <div class="radio-group">
-      <div class="radio-option"><input type="radio" name="guide" id="gVoice" value="voice" checked><label for="gVoice" id="label-voice">음성</label></div>
-      <div class="radio-option"><input type="radio" name="guide" id="gText" value="text"><label for="gText" id="label-text">텍스트</label></div>
+      <div class="radio-option">
+        <input type="radio" name="guide" id="gVoice" value="voice" checked>
+        <label for="gVoice" id="label-voice">음성</label>
+      </div>
+      <div class="radio-option">
+        <input type="radio" name="guide" id="gText" value="text">
+        <label for="gText" id="label-text">텍스트</label>
+      </div>
     </div>
   </div>
+
   <div class="card">
     <div class="card-label" id="label-lang">언어</div>
     <div class="radio-group mood-group">
-      <div class="radio-option mood-option"><input type="radio" name="lang" id="l1" value="ko" checked><label for="l1">한국어</label></div>
-      <div class="radio-option mood-option"><input type="radio" name="lang" id="l2" value="ja"><label for="l2">日本語</label></div>
-      <div class="radio-option mood-option"><input type="radio" name="lang" id="l3" value="zh"><label for="l3">中文</label></div>
-      <div class="radio-option mood-option"><input type="radio" name="lang" id="l4" value="en"><label for="l4">English</label></div>
+      <div class="radio-option mood-option">
+        <input type="radio" name="lang" id="l1" value="ko" checked>
+        <label for="l1">한국어</label>
+      </div>
+      <div class="radio-option mood-option">
+        <input type="radio" name="lang" id="l2" value="ja">
+        <label for="l2">日本語</label>
+      </div>
+      <div class="radio-option mood-option">
+        <input type="radio" name="lang" id="l3" value="zh">
+        <label for="l3">中文</label>
+      </div>
+      <div class="radio-option mood-option">
+        <input type="radio" name="lang" id="l4" value="en">
+        <label for="l4">English</label>
+      </div>
     </div>
   </div>
+
   <button class="btn-start" id="btn-start" onclick="startMeditation()">시작</button>
+
   <div style="margin-top:16px; text-align:center;">
     <div id="label-disclaimer" style="font-family:'Cormorant Garamond',serif; font-size:0.74rem; font-weight:500; font-style:italic; color:var(--accent); letter-spacing:0.1em; opacity:0.55; margin-bottom:6px;">
-      * 의학적 목적 아님. 불편하면 중단 *
+      * 의학적 목적이 아니니 불편하면 중단해주세요. *
     </div>
     <div style="font-family:'Cormorant Garamond',serif; font-size:0.72rem; font-weight:500; font-style:italic; color:var(--accent); letter-spacing:0.18em; opacity:0.45;">
       Created by One Mind
@@ -227,7 +618,6 @@
   </div>
 </div>
 
-<!-- ── MEDITATION ── -->
 <div class="screen" id="screen-med">
   <div class="med-wrap">
     <div class="breath-ring" id="breathRing">
@@ -242,10 +632,13 @@
   </div>
 </div>
 
-<!-- ── COMPLETION ── -->
 <div class="screen" id="screen-done">
   <div class="complete-wrap">
-    <div class="bell-icon">✴</div>
+    <div class="bell-icon">
+      <svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 1L14.5 8.5L22 11L14.5 13.5L12 21L9.5 13.5L2 11L9.5 8.5L12 1Z"/>
+      </svg>
+    </div>
     <div class="complete-title" id="complete-title">명상이 종료되었습니다</div>
     <div class="divider"></div>
     <div class="quote-block">
@@ -273,17 +666,20 @@ window.addEventListener('load', () => {
     { id: 'sw-pause',   delay: 1400 },
     { id: 'sw-return',  delay: 2400 },
   ];
-  steps.forEach(({ id, delay }) =>
-    setTimeout(() => document.getElementById(id).classList.add('visible'), delay)
-  );
+
+  steps.forEach(({ id, delay }) => {
+    setTimeout(() => document.getElementById(id).classList.add('visible'), delay);
+  });
+
   setTimeout(() => {
     const splash = document.getElementById('screen-splash');
     splash.style.opacity = '0';
+
     setTimeout(() => {
       splash.classList.remove('active');
       splash.style.display = 'none';
       showScreen('screen-home');
-      checkScheduledNotification(); // 앱 열 때 예약 알림 확인
+      checkScheduledNotification();
     }, 1200);
   }, 3800);
 });
@@ -437,7 +833,14 @@ const i18n = {
     pushOn: '알림 ON', pushOff: 'OFF',
     home: '홈으로 돌아가기',
     disclaimer: '* 의학적 목적이 아니니 불편하면 중단해주세요. *',
-    ttsLang: 'ko-KR', ttsRate: 0.82,
+    notifyTitle: '오늘의 명상 시간입니다',
+    notifyBody: '잠시 멈추고 숨을 고르세요.<br>오늘도 당신만의 고요한 시간입니다.',
+    notifyButton: '확인',
+    notifySet: (hhmm) => `매일 ${hhmm}에 알림이 설정되었습니다`,
+    notifyUnset: '알림이 해제되었습니다',
+    inspiredBy: (source) => `${source}에서 영감을 받은 문장`,
+    ttsLang: 'ko-KR',
+    ttsRate: 0.82,
   },
   ja: {
     duration: '呼吸時間', min30: '30分',
@@ -450,7 +853,14 @@ const i18n = {
     pushOn: '通知 ON', pushOff: 'OFF',
     home: 'ホームに戻る',
     disclaimer: '* 医療目的ではありません。不快な場合は中断してください *',
-    ttsLang: 'ja-JP', ttsRate: 0.88,
+    notifyTitle: '瞑想の時間です',
+    notifyBody: '少し立ち止まり、呼吸を整えましょう。<br>今日もあなた自身の静かな時間です。',
+    notifyButton: '確認',
+    notifySet: (hhmm) => `毎日 ${hhmm} に通知が設定されました`,
+    notifyUnset: '通知が解除されました',
+    inspiredBy: (source) => `${source} に着想を得た一節`,
+    ttsLang: 'ja-JP',
+    ttsRate: 0.88,
   },
   zh: {
     duration: '呼吸时间', min30: '30分钟',
@@ -463,7 +873,14 @@ const i18n = {
     pushOn: '通知 ON', pushOff: 'OFF',
     home: '返回首页',
     disclaimer: '* 非医疗目的。如感不适请停止 *',
-    ttsLang: 'zh-CN', ttsRate: 0.78,
+    notifyTitle: '现在是冥想时间',
+    notifyBody: '暂时停下来，调整呼吸。<br>今天也是属于你的安静时刻。',
+    notifyButton: '确认',
+    notifySet: (hhmm) => `已设置每天 ${hhmm} 的提醒`,
+    notifyUnset: '提醒已关闭',
+    inspiredBy: (source) => `灵感来自 ${source}`,
+    ttsLang: 'zh-CN',
+    ttsRate: 0.78,
   },
   en: {
     duration: 'Breathing Time', min30: '30 min',
@@ -476,7 +893,14 @@ const i18n = {
     pushOn: 'Notify ON', pushOff: 'OFF',
     home: 'Back to Home',
     disclaimer: '* Not for medical use. Stop if uncomfortable *',
-    ttsLang: 'en-US', ttsRate: 0.82,
+    notifyTitle: 'It is time to meditate',
+    notifyBody: 'Pause for a moment and settle your breath.<br>This is your quiet time today.',
+    notifyButton: 'OK',
+    notifySet: (hhmm) => `Daily reminder set for ${hhmm}`,
+    notifyUnset: 'Reminder turned off',
+    inspiredBy: (source) => `inspired by ${source}`,
+    ttsLang: 'en-US',
+    ttsRate: 0.82,
   },
 };
 
@@ -485,112 +909,112 @@ const i18n = {
 // ════════════════════════════
 const guideSegmentsAll = {
   ko: [
-    { text: "편안하게 누워주세요.",                                          pause: 2500 },
-    { text: "가능하다면\n몸을 대자 형태로 펼쳐 눕습니다.",                  pause: 3000 },
+    { text: "편안하게 누워주세요.", pause: 2500 },
+    { text: "가능하다면\n몸을 대자 형태로 펼쳐 눕습니다.", pause: 3000 },
     { text: "팔은 몸에서 조금 떨어뜨립니다.\n손바닥은 하늘을 향하게 둡니다.", pause: 3000 },
-    { text: "대자 형태가 어렵다면\n팔을 몸 옆에 편안하게 둡니다.",          pause: 2000 },
-    { text: "이때 손바닥은\n바닥을 향하게 둡니다.",                          pause: 3000 },
-    { text: "이제 천천히 눈을 감습니다.",                                    pause: 4000 },
-    { text: "몸의 긴장을\n부드럽게 풀어주세요.",                             pause: 4000 },
-    { text: "지금부터\n호흡을 시작합니다.",                                  pause: 3000 },
-    { text: "이 호흡은\n입으로 들이마시고\n입으로 내쉬는 호흡입니다.",      pause: 4000 },
-    { text: "들이마실 때 배를 내밀고\n내쉴 때 배를 깊게 집어넣습니다.",    pause: 5000 },
-    { text: "이제 시작합니다.",                                              pause: 2000 },
-    { text: "입으로\n천천히 숨을 들이마십니다.",                             pause: 4000 },
-    { text: "배를\n부드럽게 내밉니다.",                                      pause: 2000 },
-    { text: "이제\n입으로 숨을 내쉽니다.",                                   pause: 6000 },
-    { text: "배를\n깊게 집어넣습니다.",                                      pause: 3000 },
-    { text: "다시 이어갑니다.",                                              pause: 2000 },
-    { text: "입으로\n숨을 들이마십니다.",                                    pause: 4000 },
-    { text: "입으로\n숨을 내쉽니다.",                                        pause: 6000 },
-    { text: "호흡의 리듬을\n편안하게 유지합니다.",                           pause: 5000 },
-    { text: "몸의 긴장을\n천천히 내려놓습니다.",                             pause: 5000 },
-    { text: "생각이 떠올라도 괜찮습니다.",                                   pause: 3000 },
-    { text: "다시\n호흡으로 돌아옵니다.",                                    pause: 4000 },
-    { text: "입으로 들이마십니다.",                                          pause: 4000 },
-    { text: "입으로 내쉽니다.",                                              pause: 6000 },
-    { text: "이 호흡을\n조용히 이어갑니다.",                                 pause: 10000 },
+    { text: "대자 형태가 어렵다면\n팔을 몸 옆에 편안하게 둡니다.", pause: 2000 },
+    { text: "이때 손바닥은\n바닥을 향하게 둡니다.", pause: 3000 },
+    { text: "이제 천천히 눈을 감습니다.", pause: 4000 },
+    { text: "몸의 긴장을\n부드럽게 풀어주세요.", pause: 4000 },
+    { text: "지금부터\n호흡을 시작합니다.", pause: 3000 },
+    { text: "이 호흡은\n입으로 들이마시고\n입으로 내쉬는 호흡입니다.", pause: 4000 },
+    { text: "들이마실 때 배를 내밀고\n내쉴 때 배를 깊게 집어넣습니다.", pause: 5000 },
+    { text: "이제 시작합니다.", pause: 2000 },
+    { text: "입으로\n천천히 숨을 들이마십니다.", pause: 4000 },
+    { text: "배를\n부드럽게 내밉니다.", pause: 2000 },
+    { text: "이제\n입으로 숨을 내쉽니다.", pause: 6000 },
+    { text: "배를\n깊게 집어넣습니다.", pause: 3000 },
+    { text: "다시 이어갑니다.", pause: 2000 },
+    { text: "입으로\n숨을 들이마십니다.", pause: 4000 },
+    { text: "입으로\n숨을 내쉽니다.", pause: 6000 },
+    { text: "호흡의 리듬을\n편안하게 유지합니다.", pause: 5000 },
+    { text: "몸의 긴장을\n천천히 내려놓습니다.", pause: 5000 },
+    { text: "생각이 떠올라도 괜찮습니다.", pause: 3000 },
+    { text: "다시\n호흡으로 돌아옵니다.", pause: 4000 },
+    { text: "입으로 들이마십니다.", pause: 4000 },
+    { text: "입으로 내쉽니다.", pause: 6000 },
+    { text: "이 호흡을\n조용히 이어갑니다.", pause: 10000 },
   ],
   ja: [
-    { text: "楽に横になってください。",                                      pause: 2500 },
-    { text: "できれば\n大の字に体を広げて横になります。",                    pause: 3000 },
-    { text: "腕を体から少し離します。\n手のひらは天井に向けてください。",    pause: 3000 },
-    { text: "大の字が難しければ\n腕を体の横に楽に置きます。",               pause: 2000 },
-    { text: "このとき手のひらは\n床に向けてください。",                      pause: 3000 },
-    { text: "ゆっくりと目を閉じます。",                                      pause: 4000 },
-    { text: "体の力を\n優しく抜いてください。",                              pause: 4000 },
-    { text: "今から\n呼吸を始めます。",                                      pause: 3000 },
-    { text: "口から吸って\n口から吐く呼吸です。",                            pause: 4000 },
-    { text: "吸うときにお腹を出し\n吐くときにお腹を深く引き込みます。",     pause: 5000 },
-    { text: "では始めます。",                                                pause: 2000 },
-    { text: "口から\nゆっくり息を吸います。",                               pause: 4000 },
-    { text: "お腹を\n優しく出します。",                                      pause: 2000 },
-    { text: "口から\n息を吐きます。",                                        pause: 6000 },
-    { text: "お腹を\n深く引き込みます。",                                    pause: 3000 },
-    { text: "続けましょう。",                                                pause: 2000 },
-    { text: "口から\n息を吸います。",                                        pause: 4000 },
-    { text: "口から\n息を吐きます。",                                        pause: 6000 },
-    { text: "呼吸のリズムを\n心地よく保ちます。",                           pause: 5000 },
-    { text: "体の緊張を\nゆっくりと手放します。",                           pause: 5000 },
-    { text: "考えが浮かんでも大丈夫です。",                                  pause: 3000 },
-    { text: "また\n呼吸に戻ります。",                                        pause: 4000 },
-    { text: "口から吸います。",                                              pause: 4000 },
-    { text: "口から吐きます。",                                              pause: 6000 },
-    { text: "この呼吸を\n静かに続けます。",                                  pause: 10000 },
+    { text: "楽に横になってください。", pause: 2500 },
+    { text: "できれば\n大の字に体を広げて横になります。", pause: 3000 },
+    { text: "腕を体から少し離します。\n手のひらは天井に向けてください。", pause: 3000 },
+    { text: "大の字が難しければ\n腕を体の横に楽に置きます。", pause: 2000 },
+    { text: "このとき手のひらは\n床に向けてください。", pause: 3000 },
+    { text: "ゆっくりと目を閉じます。", pause: 4000 },
+    { text: "体の力を\n優しく抜いてください。", pause: 4000 },
+    { text: "今から\n呼吸を始めます。", pause: 3000 },
+    { text: "口から吸って\n口から吐く呼吸です。", pause: 4000 },
+    { text: "吸うときにお腹を出し\n吐くときにお腹を深く引き込みます。", pause: 5000 },
+    { text: "では始めます。", pause: 2000 },
+    { text: "口から\nゆっくり息を吸います。", pause: 4000 },
+    { text: "お腹を\n優しく出します。", pause: 2000 },
+    { text: "口から\n息を吐きます。", pause: 6000 },
+    { text: "お腹を\n深く引き込みます。", pause: 3000 },
+    { text: "続けましょう。", pause: 2000 },
+    { text: "口から\n息を吸います。", pause: 4000 },
+    { text: "口から\n息を吐きます。", pause: 6000 },
+    { text: "呼吸のリズムを\n心地よく保ちます。", pause: 5000 },
+    { text: "体の緊張を\nゆっくりと手放します。", pause: 5000 },
+    { text: "考えが浮かんでも大丈夫です。", pause: 3000 },
+    { text: "また\n呼吸に戻ります。", pause: 4000 },
+    { text: "口から吸います。", pause: 4000 },
+    { text: "口から吐きます。", pause: 6000 },
+    { text: "この呼吸を\n静かに続けます。", pause: 10000 },
   ],
   zh: [
-    { text: "请舒适地躺下。",                                                pause: 2500 },
-    { text: "如果可以\n请将身体展开成大字形躺好。",                          pause: 3000 },
-    { text: "双臂稍微离开身体。\n手掌朝向天花板。",                          pause: 3000 },
-    { text: "如果大字形困难\n请将手臂舒适地放在身体两侧。",                  pause: 2000 },
-    { text: "此时手掌\n朝向地面。",                                          pause: 3000 },
-    { text: "现在慢慢闭上眼睛。",                                            pause: 4000 },
-    { text: "轻轻放松\n身体的紧张。",                                        pause: 4000 },
-    { text: "现在\n开始呼吸。",                                              pause: 3000 },
-    { text: "这是用嘴吸气\n用嘴呼气的呼吸方式。",                           pause: 4000 },
-    { text: "吸气时挺出腹部\n呼气时深深收回腹部。",                          pause: 5000 },
-    { text: "现在开始。",                                                    pause: 2000 },
-    { text: "用嘴\n慢慢吸气。",                                              pause: 4000 },
-    { text: "轻轻\n挺出腹部。",                                              pause: 2000 },
-    { text: "现在\n用嘴呼气。",                                              pause: 6000 },
-    { text: "深深\n收回腹部。",                                              pause: 3000 },
-    { text: "继续。",                                                        pause: 2000 },
-    { text: "用嘴\n吸气。",                                                  pause: 4000 },
-    { text: "用嘴\n呼气。",                                                  pause: 6000 },
-    { text: "保持呼吸的节奏\n舒适地进行。",                                  pause: 5000 },
-    { text: "慢慢放下\n身体的紧张。",                                        pause: 5000 },
-    { text: "有想法浮现也没关系。",                                          pause: 3000 },
-    { text: "再次\n回到呼吸上。",                                            pause: 4000 },
-    { text: "用嘴吸气。",                                                    pause: 4000 },
-    { text: "用嘴呼气。",                                                    pause: 6000 },
-    { text: "静静地\n继续这个呼吸。",                                        pause: 10000 },
+    { text: "请舒适地躺下。", pause: 2500 },
+    { text: "如果可以\n请将身体展开成大字形躺好。", pause: 3000 },
+    { text: "双臂稍微离开身体。\n手掌朝向天花板。", pause: 3000 },
+    { text: "如果大字形困难\n请将手臂舒适地放在身体两侧。", pause: 2000 },
+    { text: "此时手掌\n朝向地面。", pause: 3000 },
+    { text: "现在慢慢闭上眼睛。", pause: 4000 },
+    { text: "轻轻放松\n身体的紧张。", pause: 4000 },
+    { text: "现在\n开始呼吸。", pause: 3000 },
+    { text: "这是用嘴吸气\n用嘴呼气的呼吸方式。", pause: 4000 },
+    { text: "吸气时挺出腹部\n呼气时深深收回腹部。", pause: 5000 },
+    { text: "现在开始。", pause: 2000 },
+    { text: "用嘴\n慢慢吸气。", pause: 4000 },
+    { text: "轻轻\n挺出腹部。", pause: 2000 },
+    { text: "现在\n用嘴呼气。", pause: 6000 },
+    { text: "深深\n收回腹部。", pause: 3000 },
+    { text: "继续。", pause: 2000 },
+    { text: "用嘴\n吸气。", pause: 4000 },
+    { text: "用嘴\n呼气。", pause: 6000 },
+    { text: "保持呼吸的节奏\n舒适地进行。", pause: 5000 },
+    { text: "慢慢放下\n身体的紧张。", pause: 5000 },
+    { text: "有想法浮现也没关系。", pause: 3000 },
+    { text: "再次\n回到呼吸上。", pause: 4000 },
+    { text: "用嘴吸气。", pause: 4000 },
+    { text: "用嘴呼气。", pause: 6000 },
+    { text: "静静地\n继续这个呼吸。", pause: 10000 },
   ],
   en: [
-    { text: "Please lie down comfortably.",                                  pause: 2500 },
-    { text: "If you can,\nstretch your body out into a star shape.",         pause: 3000 },
+    { text: "Please lie down comfortably.", pause: 2500 },
+    { text: "If you can,\nstretch your body out into a star shape.", pause: 3000 },
     { text: "Move your arms slightly away from your body.\nPalms facing up toward the ceiling.", pause: 3000 },
     { text: "If a star shape is difficult,\nplace your arms comfortably at your sides.", pause: 2000 },
-    { text: "In this case,\npalms facing down toward the floor.",            pause: 3000 },
-    { text: "Now slowly close your eyes.",                                   pause: 4000 },
-    { text: "Gently release\nany tension in your body.",                    pause: 4000 },
-    { text: "We will now\nbegin the breathing.",                            pause: 3000 },
-    { text: "Breathe in through your mouth\nand out through your mouth.",   pause: 4000 },
+    { text: "In this case,\npalms facing down toward the floor.", pause: 3000 },
+    { text: "Now slowly close your eyes.", pause: 4000 },
+    { text: "Gently release\nany tension in your body.", pause: 4000 },
+    { text: "We will now\nbegin the breathing.", pause: 3000 },
+    { text: "Breathe in through your mouth\nand out through your mouth.", pause: 4000 },
     { text: "As you inhale, let your belly rise.\nAs you exhale, draw your belly in deeply.", pause: 5000 },
-    { text: "Let's begin.",                                                  pause: 2000 },
-    { text: "Slowly breathe in\nthrough your mouth.",                       pause: 4000 },
-    { text: "Gently\nlet your belly rise.",                                  pause: 2000 },
-    { text: "Now breathe out\nthrough your mouth.",                         pause: 6000 },
-    { text: "Draw your belly\nin deeply.",                                   pause: 3000 },
-    { text: "Continue.",                                                     pause: 2000 },
-    { text: "Breathe in\nthrough your mouth.",                              pause: 4000 },
-    { text: "Breathe out\nthrough your mouth.",                             pause: 6000 },
-    { text: "Keep your breathing rhythm\ncomfortable and steady.",           pause: 5000 },
-    { text: "Slowly release\nthe tension in your body.",                    pause: 5000 },
-    { text: "It is okay if thoughts arise.",                                 pause: 3000 },
-    { text: "Simply return\nto your breath.",                               pause: 4000 },
-    { text: "Breathe in.",                                                   pause: 4000 },
-    { text: "Breathe out.",                                                  pause: 6000 },
-    { text: "Quietly continue\nthis breathing.",                            pause: 10000 },
+    { text: "Let's begin.", pause: 2000 },
+    { text: "Slowly breathe in\nthrough your mouth.", pause: 4000 },
+    { text: "Gently\nlet your belly rise.", pause: 2000 },
+    { text: "Now breathe out\nthrough your mouth.", pause: 6000 },
+    { text: "Draw your belly\nin deeply.", pause: 3000 },
+    { text: "Continue.", pause: 2000 },
+    { text: "Breathe in\nthrough your mouth.", pause: 4000 },
+    { text: "Breathe out\nthrough your mouth.", pause: 6000 },
+    { text: "Keep your breathing rhythm\ncomfortable and steady.", pause: 5000 },
+    { text: "Slowly release\nthe tension in your body.", pause: 5000 },
+    { text: "It is okay if thoughts arise.", pause: 3000 },
+    { text: "Simply return\nto your breath.", pause: 4000 },
+    { text: "Breathe in.", pause: 4000 },
+    { text: "Breathe out.", pause: 6000 },
+    { text: "Quietly continue\nthis breathing.", pause: 10000 },
   ],
 };
 
@@ -676,66 +1100,81 @@ const voiceSegmentsAll = {
   ],
 };
 
-let guideSegments  = guideSegmentsAll.ko;
-let voiceSegments  = voiceSegmentsAll.ko;
+let guideSegments = guideSegmentsAll.ko;
+let voiceSegments = voiceSegmentsAll.ko;
 
 // ════════════════════════════
 // STATE
 // ════════════════════════════
 let remaining, interval, guideInterval, expectedEndTime;
-let isPaused = false, guideMode = 'voice', selectedLang = 'ko', guideIndex = 0;
-let audioCtx = null, wakeLock = null;
+let isPaused = false;
+let guideMode = 'voice';
+let selectedLang = 'ko';
+let guideIndex = 0;
+let guideStarted = false;
+let audioCtx = null;
+let wakeLock = null;
 const synth = window.speechSynthesis;
 
-// 언어 변경 시 UI 라벨 일괄 업데이트
+// ════════════════════════════
+// I18N HELPERS
+// ════════════════════════════
+function updateNotifyTexts(lang) {
+  const t = i18n[lang] || i18n.ko;
+  document.getElementById('notifyToastTitle').textContent = t.notifyTitle;
+  document.getElementById('notifyToastBody').innerHTML = t.notifyBody;
+  document.getElementById('notifyToastBtn').textContent = t.notifyButton;
+}
+
+function formatInspiredSource(source, lang) {
+  const t = i18n[lang] || i18n.ko;
+  return `— ${t.inspiredBy(source)}`;
+}
+
 function applyLang(lang) {
   selectedLang = lang;
+  document.documentElement.lang = lang;
+
   const t = i18n[lang];
-  document.getElementById('label-duration').textContent  = t.duration;
-  document.getElementById('label-30').textContent        = t.min30;
-  document.getElementById('label-guide').textContent     = t.guide;
-  document.getElementById('label-voice').textContent     = t.voice;
-  document.getElementById('label-text').textContent      = t.text;
-  document.getElementById('label-lang').textContent      = t.langLabel;
-  document.getElementById('btn-start').textContent       = t.start;
+  document.getElementById('label-duration').textContent = t.duration;
+  document.getElementById('label-30').textContent = t.min30;
+  document.getElementById('label-guide').textContent = t.guide;
+  document.getElementById('label-voice').textContent = t.voice;
+  document.getElementById('label-text').textContent = t.text;
+  document.getElementById('label-lang').textContent = t.langLabel;
+  document.getElementById('btn-start').textContent = t.start;
   document.getElementById('label-disclaimer').textContent = t.disclaimer;
+
+  updateNotifyTexts(lang);
+
   guideSegments = guideSegmentsAll[lang];
   voiceSegments = voiceSegmentsAll[lang];
 }
 
-// 언어 라디오 변경 이벤트
 document.querySelectorAll('input[name="lang"]').forEach(el => {
   el.addEventListener('change', e => applyLang(e.target.value));
 });
 
+applyLang(selectedLang);
+
 // ════════════════════════════
 // 알림 예약 — setTimeout 단일 체인 방식
-// setInterval 폴링 없이, 다음 알림까지 정확한 ms를 계산해
-// setTimeout 하나만 걸고, 발화 후 다음날 것을 자동 재예약
 // ════════════════════════════
-const NOTIF_KEY = 'breath_notify_time'; // "HH:MM" 저장
-let notifyTimer = null; // 현재 예약된 setTimeout ID
+const NOTIF_KEY = 'breath_notify_time';
+let notifyTimer = null;
 
 function saveNotifyTime(hhmm) { localStorage.setItem(NOTIF_KEY, hhmm); }
-function loadNotifyTime()      { return localStorage.getItem(NOTIF_KEY); }
-function clearNotifyTime()     { localStorage.removeItem(NOTIF_KEY); }
+function loadNotifyTime() { return localStorage.getItem(NOTIF_KEY); }
+function clearNotifyTime() { localStorage.removeItem(NOTIF_KEY); }
 
-/**
- * "HH:MM" 기준으로 오늘 또는 내일 해당 시각까지 남은 ms 계산
- */
 function msUntilNext(hhmm) {
   const [h, m] = hhmm.split(':').map(Number);
-  const now  = new Date();
+  const now = new Date();
   const next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
-  if (next <= now) next.setDate(next.getDate() + 1); // 이미 지났으면 내일로
+  if (next <= now) next.setDate(next.getDate() + 1);
   return next - now;
 }
 
-/**
- * 알림 스케줄러 시작
- * - 기존 타이머 있으면 취소 후 새로 등록
- * - 발화 후 24시간 뒤(=다음날 같은 시각)에 자동 재예약
- */
 function checkScheduledNotification() {
   const hhmm = loadNotifyTime();
   if (!hhmm) return;
@@ -746,14 +1185,14 @@ function scheduleNextNotify(hhmm) {
   if (notifyTimer) clearTimeout(notifyTimer);
 
   const delay = msUntilNext(hhmm);
-
   notifyTimer = setTimeout(() => {
     showNotifyToast(hhmm);
-    scheduleNextNotify(hhmm); // 발화 후 다음날 동일 시각으로 자동 재예약
+    scheduleNextNotify(hhmm);
   }, delay);
 }
 
 function showNotifyToast(hhmm) {
+  updateNotifyTexts(selectedLang);
   document.getElementById('notifyTime').textContent = hhmm;
   document.getElementById('notifyOverlay').classList.add('show');
   document.getElementById('notifyToast').classList.add('show');
@@ -768,8 +1207,13 @@ function closeNotifyToast() {
 // WAKE LOCK
 // ════════════════════════════
 async function requestWakeLock() {
-  try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+    }
+  } catch (e) {}
 }
+
 function releaseWakeLock() {
   if (wakeLock) wakeLock.release().then(() => wakeLock = null);
 }
@@ -778,12 +1222,23 @@ function releaseWakeLock() {
 // AUDIO UNLOCK
 // ════════════════════════════
 function unlockAudio() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+
   if (audioCtx.state === 'suspended') audioCtx.resume();
+
   const buf = audioCtx.createBuffer(1, 1, 22050);
   const src = audioCtx.createBufferSource();
-  src.buffer = buf; src.connect(audioCtx.destination); src.start(0);
-  if (synth) { const u = new SpeechSynthesisUtterance(''); u.volume = 0; synth.speak(u); }
+  src.buffer = buf;
+  src.connect(audioCtx.destination);
+  src.start(0);
+
+  if (synth) {
+    const u = new SpeechSynthesisUtterance('');
+    u.volume = 0;
+    synth.speak(u);
+  }
 }
 
 // ════════════════════════════
@@ -793,7 +1248,11 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
-function goHome() { stopAll(); showScreen('screen-home'); }
+
+function goHome() {
+  stopAll();
+  showScreen('screen-home');
+}
 
 // ════════════════════════════
 // MEDITATION
@@ -801,29 +1260,46 @@ function goHome() { stopAll(); showScreen('screen-home'); }
 function startMeditation() {
   unlockAudio();
   requestWakeLock();
-  const dur = 30; // 30분 고정
-  guideMode   = document.querySelector('input[name="guide"]:checked').value;
+
+  const dur = 30;
+  guideMode = document.querySelector('input[name="guide"]:checked').value;
   selectedLang = document.querySelector('input[name="lang"]:checked').value;
+  document.documentElement.lang = selectedLang;
+
   guideSegments = guideSegmentsAll[selectedLang];
   voiceSegments = voiceSegmentsAll[selectedLang];
-  remaining = dur * 60; isPaused = false; guideIndex = 0;
+
+  remaining = dur * 60;
+  isPaused = false;
+  guideIndex = 0;
+  guideStarted = false;
   expectedEndTime = Date.now() + remaining * 1000;
+
   updateTimer();
   showScreen('screen-med');
+
   const t = i18n[selectedLang];
   document.getElementById('breathRing').classList.add('breathing');
   document.getElementById('pausedLabel').textContent = '';
-  document.getElementById('pauseBtn').textContent    = t.pause;
-  document.getElementById('endBtn').textContent      = t.end;
+  document.getElementById('pauseBtn').textContent = t.pause;
+  document.getElementById('endBtn').textContent = t.end;
+
   interval = setInterval(tick, 1000);
   scheduleGuide();
 }
 
 function tick() {
   if (isPaused) return;
+
   remaining = Math.round((expectedEndTime - Date.now()) / 1000);
-  if (remaining <= 0) { remaining = 0; updateTimer(); endMeditation(); }
-  else updateTimer();
+
+  if (remaining <= 0) {
+    remaining = 0;
+    updateTimer();
+    endMeditation();
+  } else {
+    updateTimer();
+  }
 }
 
 function updateTimer() {
@@ -833,124 +1309,187 @@ function updateTimer() {
 }
 
 function scheduleGuide() {
-  setTimeout(() => {
+  if (guideInterval) {
+    clearTimeout(guideInterval);
+    guideInterval = null;
+  }
+
+  guideInterval = setTimeout(() => {
+    guideInterval = null;
+    if (isPaused) return;
+
+    guideStarted = true;
+
     if (guideMode === 'voice') {
-      playVoiceScript();
+      playVoiceScript(0);
     } else {
       runSegment(0);
     }
   }, 5000);
 }
 
-// 음성 모드 — 각 문장을 읽고 정확한 ms 쉰 뒤 다음 문장으로
 function playVoiceScript(index = 0) {
   if (isPaused || index >= voiceSegments.length) return;
   if (!synth) return;
 
+  guideStarted = true;
   guideIndex = index;
-  const seg  = voiceSegments[index];
+
+  const seg = voiceSegments[index];
   const lang = i18n[selectedLang].ttsLang;
-  const rate = i18n[selectedLang].ttsRate; // 언어별 최적 속도
+  const rate = i18n[selectedLang].ttsRate;
+
   synth.cancel();
 
-  const utt  = new SpeechSynthesisUtterance(seg.text);
-  utt.lang   = lang;
-  utt.rate   = rate;
-  utt.pitch  = 0.93;
+  const utt = new SpeechSynthesisUtterance(seg.text);
+  utt.lang = lang;
+  utt.rate = rate;
+  utt.pitch = 0.93;
 
   utt.onend = () => {
-    if (!isPaused) {
-      guideInterval = setTimeout(() => playVoiceScript(index + 1), seg.pause);
-    }
+    if (isPaused) return;
+
+    guideIndex = index + 1;
+    guideInterval = setTimeout(() => {
+      playVoiceScript(index + 1);
+    }, seg.pause);
   };
 
   synth.speak(utt);
 }
 
-// 텍스트 모드 — 세그먼트별로 순차 표시
 function runSegment(index) {
   if (isPaused || index >= guideSegments.length) return;
 
-  guideIndex = index + 1;
+  guideStarted = true;
+  guideIndex = index;
+
   const seg = guideSegments[index];
-  const el  = document.getElementById('guideText');
+  const el = document.getElementById('guideText');
 
   el.classList.remove('show');
-  setTimeout(() => { el.textContent = seg.text; el.classList.add('show'); }, 400);
+  el.textContent = seg.text;
+  void el.offsetWidth;
+  el.classList.add('show');
 
-  guideInterval = setTimeout(() => runSegment(index + 1), seg.pause);
+  guideInterval = setTimeout(() => {
+    guideIndex = index + 1;
+    runSegment(index + 1);
+  }, seg.pause);
 }
 
 function togglePause() {
   isPaused = !isPaused;
-  const t    = i18n[selectedLang];
+  const t = i18n[selectedLang];
   const ring = document.getElementById('breathRing');
+
+  if (guideInterval) {
+    clearTimeout(guideInterval);
+    guideInterval = null;
+  }
+
   if (isPaused) {
-    document.getElementById('pauseBtn').textContent    = t.resume;
+    document.getElementById('pauseBtn').textContent = t.resume;
     document.getElementById('pausedLabel').textContent = t.pausing;
     ring.classList.remove('breathing');
+
     if (synth) synth.cancel();
-    if (guideInterval) { clearTimeout(guideInterval); guideInterval = null; }
+    return;
+  }
+
+  expectedEndTime = Date.now() + remaining * 1000;
+  document.getElementById('pauseBtn').textContent = t.pause;
+  document.getElementById('pausedLabel').textContent = '';
+  ring.classList.add('breathing');
+
+  if (!guideStarted) {
+    scheduleGuide();
+  } else if (guideMode === 'voice') {
+    playVoiceScript(guideIndex);
   } else {
-    expectedEndTime = Date.now() + remaining * 1000;
-    document.getElementById('pauseBtn').textContent    = t.pause;
-    document.getElementById('pausedLabel').textContent = '';
-    ring.classList.add('breathing');
-    if (guideMode === 'voice') {
-      playVoiceScript(guideIndex);
-    } else {
-      runSegment(guideIndex);
-    }
+    runSegment(guideIndex);
   }
 }
 
 function endMeditation() {
   stopAll();
-  // 싱잉볼 사운드
+
   try {
     const now = audioCtx.currentTime;
-    [{ freq:432, gain:0.28, decay:5.0 }, { freq:864, gain:0.12, decay:3.5 }, { freq:1296, gain:0.06, decay:2.5 }, { freq:1728, gain:0.03, decay:1.8 }]
-    .forEach(({ freq, gain: g, decay }) => {
+    [
+      { freq: 432,  gain: 0.28, decay: 5.0 },
+      { freq: 864,  gain: 0.12, decay: 3.5 },
+      { freq: 1296, gain: 0.06, decay: 2.5 },
+      { freq: 1728, gain: 0.03, decay: 1.8 }
+    ].forEach(({ freq, gain: g, decay }) => {
       const osc = audioCtx.createOscillator();
       const env = audioCtx.createGain();
       const lfo = audioCtx.createOscillator();
       const lfoG = audioCtx.createGain();
-      lfo.frequency.value = 4.5; lfoG.gain.value = 1.2;
-      lfo.connect(lfoG); lfoG.connect(osc.frequency);
-      osc.connect(env); env.connect(audioCtx.destination);
-      osc.type = 'sine'; osc.frequency.setValueAtTime(freq, now);
+
+      lfo.frequency.value = 4.5;
+      lfoG.gain.value = 1.2;
+      lfo.connect(lfoG);
+      lfoG.connect(osc.frequency);
+
+      osc.connect(env);
+      env.connect(audioCtx.destination);
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now);
+
       env.gain.setValueAtTime(0, now);
       env.gain.linearRampToValueAtTime(g, now + 0.02);
       env.gain.exponentialRampToValueAtTime(0.0001, now + decay);
-      lfo.start(now); lfo.stop(now + decay);
-      osc.start(now); osc.stop(now + decay);
+
+      lfo.start(now);
+      lfo.stop(now + decay);
+      osc.start(now);
+      osc.stop(now + decay);
     });
-  } catch(e) {}
-  // 명언 — 선택 언어의 30개 중 랜덤
+  } catch (e) {}
+
   const pool = quotesAll[selectedLang] || quotesAll.ko;
   const q = pool[Math.floor(Math.random() * pool.length)];
-  document.getElementById('quoteText').textContent   = `"${q.text}"`;
-  document.getElementById('quoteSource').textContent = `— ${q.source}`;
-  // 종료 화면 언어 대응
+
+  document.getElementById('quoteText').textContent = q.text;
+  document.getElementById('quoteSource').textContent = formatInspiredSource(q.source, selectedLang);
+
   const t = i18n[selectedLang];
   document.getElementById('complete-title').textContent = t.complete;
-  document.getElementById('push-label').textContent     = t.pushLabel;
-  document.getElementById('pushOn').textContent         = t.pushOn;
-  document.getElementById('pushOff').textContent        = t.pushOff;
-  document.getElementById('btn-home').textContent       = t.home;
-  document.getElementById('pushOn').className  = 'btn-push on';
+  document.getElementById('push-label').textContent = t.pushLabel;
+  document.getElementById('pushOn').textContent = t.pushOn;
+  document.getElementById('pushOff').textContent = t.pushOff;
+  document.getElementById('btn-home').textContent = t.home;
+  document.getElementById('pushOn').className = 'btn-push on';
   document.getElementById('pushOff').className = 'btn-push off';
+
   showScreen('screen-done');
 }
 
 function stopAll() {
   clearInterval(interval);
-  if (guideInterval) { clearTimeout(guideInterval); guideInterval = null; }
+  interval = null;
+
+  if (guideInterval) {
+    clearTimeout(guideInterval);
+    guideInterval = null;
+  }
+
+  guideStarted = false;
+  isPaused = false;
+
   releaseWakeLock();
+
   if (synth) synth.cancel();
+
   document.getElementById('breathRing').classList.remove('breathing');
+  document.getElementById('pausedLabel').textContent = '';
+
   const el = document.getElementById('guideText');
-  el.classList.remove('show'); el.textContent = '';
+  el.classList.remove('show');
+  el.textContent = '';
+
   guideIndex = 0;
 }
 
@@ -958,24 +1497,29 @@ function stopAll() {
 // 알림 설정
 // ════════════════════════════
 function setPush(on) {
-  document.getElementById('pushOn').className  = 'btn-push on'  + (on  ? ' selected-on'  : '');
+  document.getElementById('pushOn').className = 'btn-push on' + (on ? ' selected-on' : '');
   document.getElementById('pushOff').className = 'btn-push off' + (!on ? ' selected-off' : '');
 
   if (on) {
     const now = new Date();
     const hhmm = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
     saveNotifyTime(hhmm);
-    scheduleNextNotify(hhmm); // setTimeout 단 1회 등록
+    scheduleNextNotify(hhmm);
     showSaveConfirm(hhmm);
   } else {
     clearNotifyTime();
-    if (notifyTimer) { clearTimeout(notifyTimer); notifyTimer = null; }
+    if (notifyTimer) {
+      clearTimeout(notifyTimer);
+      notifyTimer = null;
+    }
     showSaveConfirm(null);
   }
 }
 
 function showSaveConfirm(hhmm) {
   const section = document.querySelector('.push-section');
+  const t = i18n[selectedLang] || i18n.ko;
+
   let msg = section.querySelector('.push-confirm');
   if (!msg) {
     msg = document.createElement('div');
@@ -983,18 +1527,21 @@ function showSaveConfirm(hhmm) {
     msg.style.cssText = 'font-size:0.75rem; color:var(--accent); margin-top:12px; letter-spacing:0.06em; opacity:0; transition:opacity 0.4s;';
     section.appendChild(msg);
   }
-  msg.textContent = hhmm
-    ? `매일 ${hhmm}에 알림이 설정되었습니다`
-    : '알림이 해제되었습니다';
+
+  msg.textContent = hhmm ? t.notifySet(hhmm) : t.notifyUnset;
+
   setTimeout(() => msg.style.opacity = '1', 10);
   setTimeout(() => msg.style.opacity = '0', 3000);
 }
 
 // ════════════════════════════
-// SERVICE WORKER 등록 (PWA)
-// 로컬 서버 또는 실제 배포 환경에서만 등록 시도
+// SERVICE WORKER 등록
 // ════════════════════════════
-if ('serviceWorker' in navigator && location.hostname !== 'www.claudeusercontent.com') {
+const canRegisterSW =
+  'serviceWorker' in navigator &&
+  (location.protocol === 'https:' || ['localhost', '127.0.0.1'].includes(location.hostname));
+
+if (canRegisterSW) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
       .then(reg => console.log('[SW] 등록 완료:', reg.scope))
@@ -1002,5 +1549,6 @@ if ('serviceWorker' in navigator && location.hostname !== 'www.claudeusercontent
   });
 }
 </script>
+
 </body>
 </html>
